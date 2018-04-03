@@ -1,0 +1,89 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  labels:
+    k8s-app: nginx-ingress-lb
+    kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: nginx-ingress-lb
+        name: nginx-ingress-lb
+    spec:
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      serviceAccountName: nginx-ingress-serviceaccount
+      nodeSelector:
+        role: edge-router
+      containers:
+      - image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.12.0
+        name: nginx-ingress-lb
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        # use downward API
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        ports:
+ #         - containerPort: 80
+ #           hostPort: 80
+          - containerPort: 443
+            hostPort: 443
+        args:
+          - /nginx-ingress-controller
+          - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
+          # - --enable-ssl-passthrough
+          # - --default-ssl-certificate=$(POD_NAMESPACE)/tls-certificate
+        volumeMounts:
+          - name: tls-dhparam-vol
+            mountPath: /etc/nginx-ssl/dhparam
+      volumes:
+        - name: tls-dhparam-vol
+          secret:
+            secretName: tls-dhparam
+        # - name: nginx-template-volume
+        #   configMap:
+        #     name: nginx-template
+        #     items:
+        #     - key: nginx.tmpl
+        #       path: nginx.tmpl
+
+
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: nginx-ingress
+#spec:
+#  type: LoadBalancer
+#  ports:
+#  - name: http
+#    port: 80
+#    targetPort: http
+#  - name: https
+#    port: 443
+#    targetPort: https
+#  selector:
+#    k8s-app: nginx-ingress-lb
+
+

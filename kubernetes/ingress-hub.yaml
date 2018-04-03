@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hub
+spec:
+#  tls:
+#  - secretName: tls-certificate
+#  backend:
+#    serviceName: hub
+#    servicePort: 8000
+  tls:
+    - hosts:
+      - jupyter.slac.stanford.edu
+      secretName: tls-certificate
+  rules:
+    - host: jupyter.slac.stanford.edu
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: hub
+            servicePort: 8000

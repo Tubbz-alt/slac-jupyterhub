@@ -1,0 +1,135 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hub
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: hub
+    spec:
+      serviceAccountName: hub
+      nodeSelector:
+        group: ocio
+        jupyter_role: hub
+      containers:
+        - name: hub
+          imagePullPolicy: "Always"
+          image: "slaclab/jupyterhub"
+          resources:
+            limits:
+              memory: 2G
+              cpu: 2.0
+            requests:
+              memory: 1G
+              cpu: 0.8
+          ports:
+            -
+              containerPort: 8000
+              name: hub
+          env:
+            - name: LOGLEVEL
+              value: DEBUG
+            #- name: LAB_SELECTOR_TITLE
+            #  value: 'Jupyter Stack Selector'
+            # Set to non-empty value to enable debugging.
+            - name: DEBUG
+              value: ''
+            # Set to customize what repo and what images to scan.
+            #- name: LAB_REPO_HOST
+            #  value: 'hub.docker.com'
+            #- name: LAB_REPO_OWNER
+            #  value: 'lsstsqre'
+            #- name: LAB_REPO_NAME
+            #  value: 'jld-lab'
+            # Set if you do not want to scan a repository for images.
+            #- name: LAB_IMAGE
+            #  value: ''
+            # Set if you want something other than 12 hours.  Setting to
+            # zero or a negative value disables.
+            - name: LAB_IDLE_TIMEOUT
+              value: '43200'
+            - name: LAB_MEM_LIMIT
+              value: '2G'
+            - name: LAB_CPU_LIMIT
+              value: '2.0'
+            - name: LAB_MEM_GUARANTEE
+              value: '512M'
+            - name: LAB_CPU_GUARANTEE
+              value: '0.5'
+            - name: JUPYTERLAB_CONFIG_DIR
+              value: '/opt/jupyterhub/config'
+            - name: GITHUB_ORGANIZATION_WHITELIST
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: github_organization_whitelist
+            - name: CILOGON_GROUP_WHITELIST
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: cilogon_group_whitelist
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_client_id
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_secret
+            - name: OAUTH_CALLBACK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_callback_url
+            # You want this if you're using CILogon rather than GitHub
+            #  and not using 'cilogon.org'
+            - name: CILOGON_HOST
+              value: 'test.cilogon.org'
+            # This may contain credentials, so it should be a secret
+            - name: SESSION_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: session_db_url
+            # This is one or more 32-byte encryption keys (separated
+            # with ';') needed to persist auth_state.  They can be
+            # base64 or hex-encoded.  Two lets you do key rotation
+            - name: JUPYTERHUB_CRYPT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: jupyterhub_crypto_key
+          # If you use sqlite, you want this to persist sessions across
+          #  jupyterhub restarts.
+          volumeMounts:
+            - name: hub-data
+              mountPath: /home/jupyter
+            - name: hub-config
+              mountPath: /opt/jupyterhub/config
+      volumes:
+        - name: hub-data
+          persistentVolumeClaim:
+           claimName: hub-data
+        - name: hub-config
+          configMap:
+            name: hub-config
+            #  Create with `kubectl create configmap jld-hub-config \
+            #   --from-file=config/jupyterhub_config.py \
+            #   --from-file=config/jupyterhub_config.d`
+            #  It is sort of annoying that you still have to specify
+            #   each file in the directory.
+            items:
+            - key: jupyterhub_config.py
+              path: jupyterhub_config.py
+            - key: 00-preamble.py
+              path: jupyterhub_config.d/00-preamble.py
+            - key: 10-authenticator.py
+              path: jupyterhub_config.d/10-authenticator.py
+            - key: 20-spawner.py
+              path: jupyterhub_config.d/20-spawner.py
+            - key: 30-environment.py
+              path: jupyterhub_config.d/30-environment.py
