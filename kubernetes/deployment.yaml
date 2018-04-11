@@ -133,3 +133,5 @@ spec:
               path: jupyterhub_config.d/20-spawner.py
             - key: 30-environment.py
               path: jupyterhub_config.d/30-environment.py
+            - key: node-selectors.yaml
+              path: node-selectors.yaml

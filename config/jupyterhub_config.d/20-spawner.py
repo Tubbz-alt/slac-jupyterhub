@@ -9,6 +9,7 @@ import urllib
 from urllib.error import HTTPError
 from kubespawner.objects import make_pod
 from tornado import gen
+import yaml
 
 from traitlets import Unicode, Int, Bool, List, Union
 
@@ -34,12 +35,20 @@ class SLACSpawner(kubespawner.KubeSpawner):
          help="work dammit"
     )
 
+    node_selector_config_file = Unicode('',
+        help="""
+        A YAML configuration file containing the mapping of gid and images specifications to image placement (node selector)
+        and volume/volume_mount options for that image.
+        """
+    ).tag(config=True)
+
+    
     def _options_form_default(self):
         optform = ""
 
         optform += '<h3>SLAC JupyterLab Images</h3><br/>\n'
-        optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('new_image_1', 'new_image_1_description')
-        optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('new_image_2', 'new_image_2_description')
+        optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('slaclab/slac-jupyterlab', 'SLAC JupyterLab Image')
+        # optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('new_image_2', 'new_image_2_description')
 
         # Make options form by scanning container repository
         try:
@@ -161,25 +170,48 @@ class SLACSpawner(kubespawner.KubeSpawner):
         #self.log.info("SPAWN ENV: %s" % (self.environment,))
         #self.log.info("PASS: %s" % (self.user_gids,))
         gnames = [ i.split(':')[0] for i in self.user_gids ]
-        selector_idx = None
-        for idx, item in enumerate(self.node_selectors):
-            if 'gnames' in item:
-                if set(item['gnames']).intersection(gnames):
-                    self.log.info("MATCH ON %s" % (item,))
-                    # match on image name if its defined
-                    if 'image' in item:
-                        if item['image'] == image_name:
-                            self.singleuser_node_selector = item['spawn_on']
-                            selector_idx = idx
-                    else:
-                        self.singleuser_node_selector = item['spawn_on'] 
-                        selector_idx = idx
-                    # match first
-                    break
+        
+        spawn_on = {}
+        volumes = []
+        volume_mounts = []
+        node_selectors = {}
+        with open( self.node_selector_config_file, 'r' ) as config:
+            node_selectors = yaml.safe_load(config)
+            if 'node_defaults' in node_selectors:
+                this = node_selectors['node_defaults']
+                if 'spawn_on' in this:
+                    spawn_on = this['spawn_on']
+                if 'volumes' in this:
+                    volumes = this['volumes']
+                if 'volume_mounts' in this:
+                    volume_mounts = this['volume_mounts']
 
-        self.log.info("spawning pod with NodeSelector: %s, idx %s" % (self.singleuser_node_selector,selector_idx))
+        self.log.info("NODE SELECTORS: %s" % (node_selectors,))
+        self.log.info("DEFAULTS: %s / %s / %s" % (spawn_on,volumes,volume_mounts))
+        
+        selector_idx = None
+        if 'node_selectors' in node_selectors:
+            for idx, item in enumerate(node_selectors['node_selectors']):
+                if 'gnames' in item:
+                    if set(item['gnames']).intersection(gnames):
+                        self.log.info("MATCH ON %s" % (item,))
+                        # match on image name if its defined
+                        if 'image' in item:
+                            if item['image'] == image_name:
+                                spawn_on = item['spawn_on']
+                                selector_idx = idx
+                        else:
+                            spawn_on = item['spawn_on']
+                            selector_idx = idx
+                        # match first
+                        break
+
+        self.log.info("spawning pod with NodeSelector: %s, idx %s" % (spawn_on,selector_idx))
         if isinstance(selector_idx, int):
-            self.log.info("  with storage spec: volumes=%s, volume_mounts=%s" % (self.node_selectors[idx]['volumes'], self.node_selectors[idx]['volume_mounts'] ))
+            volumes = node_selectors['node_selectors'][idx]['volumes']
+            volume_mounts = node_selectors['node_selectors'][idx]['volume_mounts']
+
+        self.log.info("  with storage spec: volumes=%s, volume_mounts=%s" % (volumes, volume_mounts) )
 
         return make_pod(
             name=self.pod_name,
@@ -188,13 +220,13 @@ class SLACSpawner(kubespawner.KubeSpawner):
             image_pull_secret=self.singleuser_image_pull_secrets,
             port=self.port,
             cmd=real_cmd,
-            node_selector=self.singleuser_node_selector,
+            node_selector=spawn_on,
             run_as_uid=singleuser_uid,
             fs_gid=singleuser_fs_gid,
             run_privileged=self.singleuser_privileged,
             env=pod_env,
-            volumes=self._expand_all(self.node_selectors[idx]['volumes']),
-            volume_mounts=self._expand_all(self.node_selectors[idx]['volume_mounts']),
+            volumes=self._expand_all(volumes),
+            volume_mounts=self._expand_all(volume_mounts),
             working_dir=self.singleuser_working_dir,
             labels=labels,
             cpu_limit=self.cpu_limit,
@@ -390,16 +422,22 @@ class ScanRepo(object):
 
 
 c.JupyterHub.spawner_class = SLACSpawner
-# defaults
-c.SLACSpawner.singleuser_node_selector = { 'group': 'ocio' }
-c.SLACSpawner.volumes = [ {'name': 'generic-user-home', 'persistentVolumeClaim': { 'claimName': 'generic-user-home' }} ]
-c.SLACSpawner.volume_mounts = [ { 'mountPath': '/home/', 'name': 'generic-user-home' } ]
-# overrides if user is in matched group and runs image
-c.SLACSpawner.node_selectors = [
-    { 
-        'gnames': ['lsst','lsst-ccs',], 'image': 'jld-lab', 'spawn_on': { 'group': 'lsst' }, 
-        'volumes': [ {'name': 'lsst-home', 'persistentVolumeClaim': { 'claimName': 'lsst-home' }}, {'name': 'lsst-data', 'persistentVolumeClaim': { 'claimName': 'lsst-data' }} ], 
-        'volume_mounts': [ { 'mountPath': '/home/', 'name': 'lsst-home' }, { 'mountPath': '/gpfs/slac/lsst/fs1/g/', 'name': 'lsst-data' } ],
-    },
-]
+c.SLACSpawner.node_selector_config_file = '/opt/jupyterhub/config/node-selectors.yaml'
+
+c.SLACSpawner.start_timeout = 60
+c.SLACSpawner.http_timeout = 60
+
+
+
+# c.SLACSpawner.singleuser_node_selector = { 'group': 'ocio' }
+# c.SLACSpawner.volumes = [ {'name': 'generic-user-home', 'persistentVolumeClaim': { 'claimName': 'generic-user-home' }} ]
+# c.SLACSpawner.volume_mounts = [ { 'mountPath': '/home/', 'name': 'generic-user-home' } ]
+# # overrides if user is in matched group and runs image
+# c.SLACSpawner.node_selectors = [
+#     {
+#         'gnames': ['lsst','lsst-ccs',], 'image': 'jld-lab', 'spawn_on': { 'group': 'lsst' },
+#         'volumes': [ {'name': 'lsst-home', 'persistentVolumeClaim': { 'claimName': 'lsst-home' }}, {'name': 'lsst-data', 'persistentVolumeClaim': { 'claimName': 'lsst-data' }} ],
+#         'volume_mounts': [ { 'mountPath': '/home/', 'name': 'lsst-home' }, { 'mountPath': '/data/', 'name': 'lsst-data' } ],
+#     },
+# ]
 
