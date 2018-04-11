@@ -87,7 +87,7 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
         spawner.default_url = '/lab'
         spawner.singleuser_image_pull_policy = 'Always'
         
-        self.log.info("HERE _state: %s" % self._state)
+        # self.log.info("HERE _state: %s" % self._state)
 
         #spawner.singleuser_uid = self._state["uidNumber"]
         spawner.environment['EXTERNAL_UID'] = str( self._state["uidNumber"] )
