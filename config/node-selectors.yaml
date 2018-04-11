@@ -1,32 +1,51 @@
 node_defaults:
   spawn_on:
     group: ocio
-  volumes:
-    - name: generic-user-home
-      persistentVolumeClaim:
-        claimName: generic-user-home
-  volume_mounts:
-    - name: generic-user-home
-      mountPath: '/home/'
+  spec:
+    volumes:
+      - name: generic-user-home
+        persistentVolumeClaim:
+          claimName: generic-user-home
+    volume_mounts:
+      - name: generic-user-home
+        mountPath: '/home/'
   
 node_selectors:
-  - gnames:
-      - lsst
-      - lsst-ccs
-    image: 'jld-lab'
+  - filter:
+      gnames:
+        - lsst
+        - lsst-ccs
+      images:
+        - jld-lab
     spawn_on:
       group': lsst
-    volumes:
-      - name: lsst-home
-        persistentVolumeClaim:
-          claimName: lsst-home
-      - name: lsst-data
-        persistentVolumeClaim:
-          claimName: lsst-data
-    volume_mounts:
-      - name: 'lsst-home'
-        mountPath: '/home/'
-      - name: 'lsst-data'
-        mountPath: '/data/'
+    spec:
+      volumes:
+        - name: lsst-home
+          persistentVolumeClaim:
+            claimName: lsst-home
+        - name: lsst-data
+          persistentVolumeClaim:
+            claimName: lsst-data
+      volume_mounts:
+        - name: 'lsst-home'
+          mountPath: '/home/'
+        - name: 'lsst-data'
+          mountPath: '/data/'
         
 
+  - filter:
+      gnames:
+        - sf
+      images:
+        - slac-jupyterlab
+    spawn_on:
+      group': ocio
+    spec:
+        volumes:
+          - name: generic-user-home
+            persistentVolumeClaim:
+              claimName: generic-user-home
+        volume_mounts:
+          - name: generic-user-home
+            mountPath: '/home/'

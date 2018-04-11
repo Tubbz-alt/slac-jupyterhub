@@ -136,7 +136,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
                 image_name = image_spec[(s_idx + 1):c_idx]
                 tag = image_spec[(c_idx + 1):]
         pn_template = image_name + "-{username}-" + tag
-        self.log.info('image: %s' % (image_name,))
+        self.log.info('running image: %s' % (image_name,))
 
         auth_state = yield self.user.get_auth_state()
         self.log.info("AuthState: %s"%(auth_state,))
@@ -174,45 +174,48 @@ class SLACSpawner(kubespawner.KubeSpawner):
         spawn_on = {}
         volumes = []
         volume_mounts = []
-        node_selectors = {}
-        with open( self.node_selector_config_file, 'r' ) as config:
-            node_selectors = yaml.safe_load(config)
-            if 'node_defaults' in node_selectors:
-                this = node_selectors['node_defaults']
+        config = {}
+        spec = {}
+        with open( self.node_selector_config_file, 'r' ) as f:
+            config = yaml.safe_load(f)
+            if 'node_defaults' in config:
+                this = config['node_defaults']
                 if 'spawn_on' in this:
                     spawn_on = this['spawn_on']
-                if 'volumes' in this:
-                    volumes = this['volumes']
-                if 'volume_mounts' in this:
-                    volume_mounts = this['volume_mounts']
-
-        self.log.info("NODE SELECTORS: %s" % (node_selectors,))
-        self.log.info("DEFAULTS: %s / %s / %s" % (spawn_on,volumes,volume_mounts))
+                if 'spec' in this:
+                    spec = this['spec']
+                    
+        self.log.info("node-selectors config: %s" % (config,))
         
-        selector_idx = None
-        if 'node_selectors' in node_selectors:
-            for idx, item in enumerate(node_selectors['node_selectors']):
-                if 'gnames' in item:
-                    if set(item['gnames']).intersection(gnames):
-                        self.log.info("MATCH ON %s" % (item,))
-                        # match on image name if its defined
-                        if 'image' in item:
-                            if item['image'] == image_name:
-                                spawn_on = item['spawn_on']
-                                selector_idx = idx
-                        else:
-                            spawn_on = item['spawn_on']
-                            selector_idx = idx
-                        # match first
+        if 'node_selectors' in config:
+            for idx, item in enumerate(config['node_selectors']):
+                if 'filter' in item:
+                    this = item['filter']
+                    matching = []
+
+                    self.log.info("checking filter: %s" % (this,))
+                    for n in ( 'gnames', 'images', 'uid'):
+                        if n in this:
+                            a = []
+                            if n == 'gnames':
+                                a = gnames
+                            elif n == 'images':
+                                a = [ image_name, ]
+                            # TODO: hwo to get the uid?
+                            self.log.info("  %s against %s" % (n, a))
+                            if set( this[n] ).intersection( a ):
+                                matching.append( True )
+                            else:
+                                matching.append( False )
+                    self.log.info(" matching: %s" % (matching,))
+                    if False in matching:
+                        continue
+                    else:
+                        spec = item['spec']
+                        self.log.info(" using spec: %s" % (spec,))
                         break
 
-        self.log.info("spawning pod with NodeSelector: %s, idx %s" % (spawn_on,selector_idx))
-        if isinstance(selector_idx, int):
-            volumes = node_selectors['node_selectors'][idx]['volumes']
-            volume_mounts = node_selectors['node_selectors'][idx]['volume_mounts']
-
-        self.log.info("  with storage spec: volumes=%s, volume_mounts=%s" % (volumes, volume_mounts) )
-
+        self.log.info("spawning pod with NodeSelector: %s, spec %s" % (spawn_on,spec))
         return make_pod(
             name=self.pod_name,
             image_spec=self.singleuser_image_spec,
@@ -225,8 +228,8 @@ class SLACSpawner(kubespawner.KubeSpawner):
             fs_gid=singleuser_fs_gid,
             run_privileged=self.singleuser_privileged,
             env=pod_env,
-            volumes=self._expand_all(volumes),
-            volume_mounts=self._expand_all(volume_mounts),
+            volumes=self._expand_all(spec['volumes']) if 'volumes' in spec else self._expand_all([]),
+            volume_mounts=self._expand_all(spec['volume_mounts']) if 'volume_mounts' in spec else self._expand_all([]),
             working_dir=self.singleuser_working_dir,
             labels=labels,
             cpu_limit=self.cpu_limit,
