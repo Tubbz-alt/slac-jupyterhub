@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: prepuller
 spec:
-  schedule: "48 * * * *"
+  schedule: "48 */3 * * *"
   jobTemplate:
     spec:
       template:
