@@ -1,0 +1,28 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: lsst-data
+  labels:
+    type: local
+spec:
+  storageClassName: lsst-data
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "__HOME_DIR__"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: lsst-data
+spec:
+  storageClassName: lsst-data
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
