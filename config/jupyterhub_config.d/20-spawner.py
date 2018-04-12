@@ -431,16 +431,3 @@ c.SLACSpawner.start_timeout = 60
 c.SLACSpawner.http_timeout = 60
 
 
-
-# c.SLACSpawner.singleuser_node_selector = { 'group': 'ocio' }
-# c.SLACSpawner.volumes = [ {'name': 'generic-user-home', 'persistentVolumeClaim': { 'claimName': 'generic-user-home' }} ]
-# c.SLACSpawner.volume_mounts = [ { 'mountPath': '/home/', 'name': 'generic-user-home' } ]
-# # overrides if user is in matched group and runs image
-# c.SLACSpawner.node_selectors = [
-#     {
-#         'gnames': ['lsst','lsst-ccs',], 'image': 'jld-lab', 'spawn_on': { 'group': 'lsst' },
-#         'volumes': [ {'name': 'lsst-home', 'persistentVolumeClaim': { 'claimName': 'lsst-home' }}, {'name': 'lsst-data', 'persistentVolumeClaim': { 'claimName': 'lsst-data' }} ],
-#         'volume_mounts': [ { 'mountPath': '/home/', 'name': 'lsst-home' }, { 'mountPath': '/data/', 'name': 'lsst-data' } ],
-#     },
-# ]
-
