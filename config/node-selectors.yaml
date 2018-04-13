@@ -18,7 +18,7 @@ node_selectors:
       images:
         - jld-lab
     spawn_on:
-      group': lsst
+      group: lsst
     spec:
       volumes:
         - name: lsst-home
@@ -35,12 +35,10 @@ node_selectors:
         
 
   - filter:
-      gnames:
-        - sf
       images:
-        - slac-jupyterlab
+        - slac-jupyterlab-gpu
     spawn_on:
-      group': ocio
+      group: gpu
     spec:
         volumes:
           - name: generic-user-home
@@ -49,3 +47,5 @@ node_selectors:
         volume_mounts:
           - name: generic-user-home
             mountPath: '/home/'
+        extra_resource_limits:
+          nvidia.com/gpu: 1
