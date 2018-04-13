@@ -227,13 +227,14 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
                     search_filter=self.group_search_filter.format(username=username),
                     attributes=self.attributes
             )
-            if len(conn.response) == 0:
-                self.log.warn('User {username} not found in any groups'.format(
-                    username=username))
-                return None
-            elif len(conn.response) > 0:
-                self._state['gidNumbers'] = []
-                self._state['gidCNs'] = []
+            # if len(conn.response) == 0:
+            #     self.log.warn('User {username} not found in any groups'.format(
+            #         username=username))
+            #     return None
+            #el
+            self._state['gidNumbers'] = []
+            self._state['gidCNs'] = []
+            if len(conn.response) > 0:
                 # self.log.error('groups found: %s' % (conn.response,))
                 for item in conn.response:
                   #self.log.info("    %s: %s" % (item['attributes']['gidNumber'],item['attributes']['cn']))
