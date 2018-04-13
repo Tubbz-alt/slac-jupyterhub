@@ -48,7 +48,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
 
         optform += '<h3>SLAC JupyterLab Images</h3><br/>\n'
         optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('slaclab/slac-jupyterlab', 'SLAC JupyterLab Image')
-        # optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('new_image_2', 'new_image_2_description')
+        optform += '<input type="radio" name="kernel_image" value="%s">%s<br>\n' % ('slaclab/slac-jupyterlab-gpu', 'SLAC JupyterLab Image (GPU)')
 
         # Make options form by scanning container repository
         try:
@@ -211,6 +211,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
                     if False in matching:
                         continue
                     else:
+                        spawn_on = item['spawn_on']
                         spec = item['spec']
                         self.log.info(" using spec: %s" % (spec,))
                         break
@@ -236,6 +237,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
             cpu_guarantee=self.cpu_guarantee,
             mem_limit=self.mem_limit,
             mem_guarantee=self.mem_guarantee,
+            extra_resource_limits=spec['extra_resource_limits'] if 'extra_resource_limits' in spec else {},
             lifecycle_hooks=self.singleuser_lifecycle_hooks,
             init_containers=self.singleuser_init_containers,
             service_account=None
