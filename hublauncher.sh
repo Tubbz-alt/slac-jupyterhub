@@ -14,11 +14,12 @@ cd ${HOMEDIR}
 export HUB_BIND_IP=$(/sbin/ifconfig | grep 'inet ' | awk '{print $2}' | \
 			 grep -v '127.0.0.1' | head -1)
 dbgflag=""
-conf="/opt/jupyterhub/config/jupyterhub_config.py"
+conf="${JUPYTERHUB_BIN}/config/jupyterhub_config.py"
 if [ -n "${DEBUG}" ]; then
     dbgflag="--debug "
 fi
-cmd="sudo -E -u ${USER} /usr/bin/jupyterhub ${dbgflag} -f ${conf}"
+source scl_source enable rh-python36
+cmd="sudo -E -u ${USER} ${JUPYTERHUB_BIN}/hubwrapper.sh ${dbgflag} -f ${conf}"
 if [ -n "${DEBUG}" ]; then
     ${cmd}
     sleep 600
