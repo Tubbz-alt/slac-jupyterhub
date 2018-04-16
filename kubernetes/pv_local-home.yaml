@@ -1,0 +1,28 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: local-home
+  labels:
+    type: local
+spec:
+  storageClassName: local-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "__HOME_DIR__"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: local-home
+spec:
+  storageClassName: local-home
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
