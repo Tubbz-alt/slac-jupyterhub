@@ -1,0 +1,8 @@
+title: "SLAC JupyterLab Images"
+images:
+  - image: slaclab/slac-jupyterlab
+    description: SLAC JupyterLab Image
+  - image: slaclab/slac-jupyterlab-gpu
+    description: SLAC JupyterLab Image (GPU)
+
+
