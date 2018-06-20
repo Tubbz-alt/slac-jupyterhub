@@ -1,9 +1,9 @@
 images:
-- {description: Daily 2018_05_21, image: 'lsstsqre/jld-lab:d20180521'}
-- {description: Daily 2018_05_20, image: 'lsstsqre/jld-lab:d20180520'}
-- {description: Daily 2018_05_18, image: 'lsstsqre/jld-lab:d20180518'}
-- {description: Weekly 2018_20, image: 'lsstsqre/jld-lab:w201820'}
-- {description: Weekly 2018_19, image: 'lsstsqre/jld-lab:w201819'}
-- {description: Release 15.0, image: 'lsstsqre/jld-lab:r150'}
+- {description: Daily 2018_06_19, image: 'lsstsqre/jld-lab:d20180619'}
+- {description: Daily 2018_06_18, image: 'lsstsqre/jld-lab:d20180618'}
+- {description: Daily 2018_06_17, image: 'lsstsqre/jld-lab:d20180617'}
+- {description: Weekly 2018_24, image: 'lsstsqre/jld-lab:w201824'}
+- {description: Weekly 2018_23, image: 'lsstsqre/jld-lab:w201823'}
+- {description: Release 16.0rc1, image: 'lsstsqre/jld-lab:r160rc1'}
 title: LSST lsstsqre/jld-lab Images
-updated: Mon May 21 21:54:03 2018 UTC
+updated: Wed Jun 20 00:42:32 2018 UTC
