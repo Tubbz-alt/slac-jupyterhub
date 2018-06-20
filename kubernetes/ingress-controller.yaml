@@ -19,7 +19,8 @@ spec:
       nodeSelector:
         role: edge-router
       containers:
-      - image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.12.0
+      #- image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.12.0
+      - image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.15.0
         name: nginx-ingress-lb
         imagePullPolicy: Always
         readinessProbe:
@@ -52,7 +53,7 @@ spec:
         args:
           - /nginx-ingress-controller
           - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
-          # - --enable-ssl-passthrough
+          - --enable-ssl-passthrough
           # - --default-ssl-certificate=$(POD_NAMESPACE)/tls-certificate
         volumeMounts:
           - name: tls-dhparam-vol
