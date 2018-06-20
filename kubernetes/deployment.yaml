@@ -135,3 +135,8 @@ spec:
               path: jupyterhub_config.d/30-environment.py
             - key: node-selectors.yaml
               path: node-selectors.yaml
+            - key: 01-slac.yaml
+              path: images.d/01-slac.yaml
+            - key: 05-lsst.yaml
+              path: images.d/05-lsst.yaml
+              

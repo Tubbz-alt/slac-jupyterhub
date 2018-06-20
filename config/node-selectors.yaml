@@ -3,11 +3,11 @@ node_defaults:
     group: ocio
   spec:
     volumes:
-      - name: generic-user-home
+      - name: local-home
         persistentVolumeClaim:
-          claimName: generic-user-home
+          claimName: local-home
     volume_mounts:
-      - name: generic-user-home
+      - name: local-home
         mountPath: '/home/'
   
 node_selectors:
@@ -38,7 +38,8 @@ node_selectors:
       images:
         - slac-jupyterlab-gpu
     spawn_on:
-      group: ocio
+      # group: ocio
+      accelerator: nvidia
     spec:
         volumes:
           - name: local-home
@@ -47,5 +48,7 @@ node_selectors:
         volume_mounts:
           - name: local-home
             mountPath: '/home/'
-        #extra_resource_limits:
-        #  nvidia.com/gpu: "1"
+        cpu: 4
+        memory: 10G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
