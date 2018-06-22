@@ -16,7 +16,7 @@ RUN  source scl_source enable rh-python36 && \
       pip3 install --upgrade pip setuptools
 RUN  npm install -g configurable-http-proxy
 RUN  source scl_source enable rh-python36 && \
-     pip3 install jupyterlab ipykernel pyyaml pycurl python-oauth2 wheel \
+     pip3 install jupyterlab ipykernel pyyaml pycurl==7.43.0.1 python-oauth2 wheel \
       cryptography mysqlclient
 RUN  source scl_source enable rh-python36 && \
       pip3 install \
