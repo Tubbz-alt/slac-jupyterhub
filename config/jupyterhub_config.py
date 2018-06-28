@@ -1,3 +1,4 @@
+
 """Bootstrapper configuration for JupyterHub
 Based on:
 
@@ -25,3 +26,4 @@ if dirname[0] != '/':
 
 for f in sorted(glob(os.path.join(confdir, '*.py'))):
     load_subconfig(f)
+
