@@ -1,0 +1,195 @@
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub
+  labels:
+    name: hub
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+  - name: api
+    port: 8081
+    protocol: TCP
+  selector:
+    name: hub
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hub
+spec:
+  tls:
+    - hosts:
+      - ${hub_url}
+      secretName: tls-certificate
+  rules:
+    - host: ${hub_url} 
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: hub
+            servicePort: 8000
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--hub-data
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--hub-data
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${hub_data}
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ${namespace}--hub-data
+spec:
+  storageClassName: ${namespace}--hub-data
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: hub
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        name: hub
+    spec:
+      serviceAccountName: ${namespace}-${environment}
+      nodeSelector:
+        group: ocio
+        jupyter_role: hub
+      containers:
+        - name: hub
+          imagePullPolicy: "Always"
+          image: ${hub_image}
+          resources:
+            limits:
+              memory: 2G
+              cpu: 2.0
+            requests:
+              memory: 1G
+              cpu: 0.8
+          ports:
+            -
+              containerPort: 8000
+              name: hub
+          env:
+            - name: LOGLEVEL
+              value: DEBUG
+            - name: DEBUG
+              value: ''
+            - name: LAB_IDLE_TIMEOUT
+              value: '43200'
+            - name: LAB_MEM_LIMIT
+              value: '2G'
+            - name: LAB_CPU_LIMIT
+              value: '2.0'
+            - name: LAB_MEM_GUARANTEE
+              value: '512M'
+            - name: LAB_CPU_GUARANTEE
+              value: '0.5'
+            - name: JUPYTERLAB_CONFIG_DIR
+              value: '/opt/jupyterhub/config'
+            - name: GITHUB_ORGANIZATION_WHITELIST
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: github_organization_whitelist
+            - name: CILOGON_GROUP_WHITELIST
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: cilogon_group_whitelist
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_client_id
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_secret
+            - name: OAUTH_CALLBACK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: oauth_callback_url
+            - name: CILOGON_HOST
+              value: 'test.cilogon.org'
+            # This may contain credentials, so it should be a secret
+            - name: SESSION_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: session_db_url
+            - name: JUPYTERHUB_CRYPT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: jupyterhub_crypto_key
+          volumeMounts:
+            - name: hub-data
+              mountPath: /home/jupyter
+            - name: hub-config
+              mountPath: /opt/jupyterhub/config
+      volumes:
+        - name: hub-data
+          persistentVolumeClaim:
+           claimName: ${namespace}--hub-data
+        - name: hub-config
+          configMap:
+            name: hub-config
+            items:
+            - key: jupyterhub_config.py
+              path: jupyterhub_config.py
+            - key: 00-preamble.py
+              path: jupyterhub_config.d/00-preamble.py
+            - key: 10-authenticator.py
+              path: jupyterhub_config.d/10-authenticator.py
+            - key: 20-spawner.py
+              path: jupyterhub_config.d/20-spawner.py
+            - key: 30-environment.py
+              path: jupyterhub_config.d/30-environment.py
+            - key: node-selectors.yaml
+              path: node-selectors.yaml
+            - key: 01-slac.yaml
+              path: images.d/01-slac.yaml
+            - key: 05-lsst.yaml
+              path: images.d/05-lsst.yaml

@@ -1,0 +1,53 @@
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: generic-user-home
+spec:
+  storageClassName: ${namespace}--generic-user-home
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: local-home
+spec:
+  storageClassName: ${namespace}--local-home
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: lsst-data
+spec:
+  storageClassName: ${namespace}--lsst-data
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: lsst-home
+spec:
+  storageClassName: ${namespace}--lsst-home
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 10Gi
+
+

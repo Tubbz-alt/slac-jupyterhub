@@ -1,0 +1,35 @@
+---
+kind: ConfigMap
+metadata:
+  name: hub-config
+apiVersion: v1
+data:
+  
+  jupyterhub_config.py: |-
+    
+$( cat ${jupyterhub_config_file}  | sed 's/^/    /' )
+  
+  00-preamble.py: |-
+
+$( cat ${preamble_file}  | sed 's/^/    /' )
+    
+  10-authenticator.py: |-
+    
+$( cat ${authenticator_file}  | sed 's/^/    /' )
+    
+  30-environment.py: |-
+    
+$( cat ${environment_file}  | sed 's/^/    /' )
+    
+  node-selectors.yaml: |-
+    
+$( cat ${node_selectors_file}  | sed 's/^/    /' )
+    
+  01-slac.yaml: |-
+    
+$( cat ${slac_images_file}  | sed 's/^/    /' )
+    
+  05-lsst.yaml.yaml: |-
+    
+$( cat ${lsst_images_file}  | sed 's/^/    /' )
+

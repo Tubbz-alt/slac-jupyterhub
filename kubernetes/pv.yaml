@@ -1,0 +1,68 @@
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--generic-user-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--generic-user-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${generic_user_home}"
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--local-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--local-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${local_home}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--lsst-data
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--lsst-data
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${lsst_data}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--lsst-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--lsst-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${lsst_home}
+
