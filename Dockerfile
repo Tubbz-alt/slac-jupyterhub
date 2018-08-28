@@ -29,7 +29,7 @@ RUN  source scl_source enable rh-python36 && \
       jupyter serverextension enable --py \
       jupyterlab --sys-prefix
 
-ENV JUPYTERHUB_BIN=/OPT/JUPYTERHUB
+ENV JUPYTERHUB_BIN=/opt/jupyterhub
       
 RUN  mkdir -p ${JUPYTERHUB_BIN}/config
 COPY hublauncher.sh hubwrapper.sh ${JUPYTERHUB_BIN}/
