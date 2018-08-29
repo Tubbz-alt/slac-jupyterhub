@@ -28,7 +28,7 @@ spec:
   capacity:
     storage: 10000Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   hostPath:
     path: ${local_home}
 

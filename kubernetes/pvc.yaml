@@ -19,7 +19,7 @@ metadata:
 spec:
   storageClassName: ${namespace}--local-home
   accessModes:
-    - "ReadWriteOnce"
+    - "ReadWriteMany"
   resources:
     requests:
       storage: 10Gi
