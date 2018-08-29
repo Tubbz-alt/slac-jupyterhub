@@ -66,78 +66,35 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
         spawner.mem_guarantee = os.getenv('LAB_MEM_GUARANTEE') or '64K'
         spawner.cpu_guarantee = float(os.getenv('LAB_CPU_GUARANTEE')) if os.getenv('LAB_CPU_GUARANTEE') else 0.02
 
-        # Persistent shared user volume
-        #volname = "jld-fileserver-home"
-        #homefound = False
-        #for v in spawner.volumes:
-        #    self.log.info("spawner volume: %s" % (v,))
-        #    if v["name"] == volname:
-        #        homefound = True
-        #        break
-        #if not homefound:
-        #    self.log.info("spawner volume %s not found" % (volname,))
-        #    spawner.volumes.extend([
-        #        {"name": volname,
-        #         "persistentVolumeClaim":
-        #         {"claimName": volname}}])
-        #    spawner.volume_mounts.extend([
-        #        {"mountPath": "/home",
-        #         "name": volname}])
-
         # We are running the Lab at the far end, not the old Notebook
         spawner.default_url = '/lab'
-        spawner.singleuser_image_pull_policy = 'Always'
-        
-        # self.log.info("HERE _state: %s" % self._state)
+        spawner.image_pull_policy = 'Always'
 
-        #spawner.singleuser_uid = self._state["uidNumber"]
-        spawner.environment['EXTERNAL_UID'] = str( self._state["uidNumber"] )
-        #spawner.singleuser_fs_gid = self._state["gidNumber"]
+        if 'uidNumber' in self._state:
+            spawner.environment['EXTERNAL_UID'] = str( self._state["uidNumber"] )
+        #spawner.uid = self._state["uidNumber"]
+        #spawner.fs_gid = self._state["gidNumber"]
 
-        tuples = [ '%s:%s' % (self._state['gidCN'],self._state['gidNumber']) ]
-        for i,n in enumerate(self._state["gidNumbers"]):
-            tuples.append( '%s:%s' % (self._state['gidCNs'][i],n) )
-        spawner.environment['EXTERNAL_GROUPS'] = ','.join( tuples )
-        spawner.user_gids = tuples 
+        if 'gidCN' in self._state and 'gidNumber' in self._state:
+            tuples = [ '%s:%s' % (self._state['gidCN'],self._state['gidNumber']) ]
+            for i,n in enumerate(self._state["gidNumbers"]):
+                tuples.append( '%s:%s' % (self._state['gidCNs'][i],n) )
+            spawner.environment['EXTERNAL_GROUPS'] = ','.join( tuples )
+            spawner.user_gids = tuples 
 
-        self.log.info("Spawned environment: %s", json.dumps(
-             spawner.environment, sort_keys=True, indent=4))
-
-        #self.log.info(" new cns: %s" % (self._state["gidCNs"],))
-        #default_group = 'lsst' if 'gidCNs' in self._state and 'lsst' in ':'.join(self._state["gidCNs"]) else 'ocio'
-        #spawner.singleuser_node_selector = { 'group': default_group }
-        #self.log.info("spawn options: %s" % (spawner,))
+        self.log.info("Spawning for %s with environment: %s" % (str(user), json.dumps(spawner.environment, sort_keys=True, indent=4)) )
 
 
-    @gen.coroutine
-    def authenticate(self, handler, data):
-
-        self._state = {}
-        
+    def _authenticate(self, handler, data):
         username = data['username']
         password = data['password']
-        # Get LDAP Connection
-        def getConnection(userdn, username, password):
-            server = ldap3.Server(
-                self.server_address,
-                port=self.server_port,
-                use_ssl=self.use_ssl
-            )
-            self.log.debug('Attempting to bind {username} with {userdn}'.format(
-                    username=username,
-                    userdn=userdn
-            ))
-            conn = ldap3.Connection(
-                server,
-                user=self.escape_userdn_if_needed(userdn),
-                password=password,
-                auto_bind=ldap3.AUTO_BIND_TLS_BEFORE_BIND,
-            )
-            return conn
-        
+
         # Protect against invalid usernames as well as LDAP injection attacks
         if not re.match(self.valid_username_regex, username):
-            self.log.warn('username:%s Illegal characters in username, must match regex %s', username, self.valid_username_regex)
+            self.log.warn(
+                'username:%s Illegal characters in username, must match regex %s',
+                username, self.valid_username_regex
+            )
             return None
 
         # No empty passwords!
@@ -145,111 +102,180 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
             self.log.warn('username:%s Login denied for blank password', username)
             return None
 
-        isBound = False
-        self.log.debug("TYPE= '%s'",isinstance(self.bind_dn_template, list))
+        if self.lookup_dn:
+            username = self.resolve_username(username)
+            if not username:
+                return None
 
-        resolved_username = self.resolve_username(username)
-        if resolved_username is None:
-            return None
+        if self.lookup_dn:
+            if str(self.lookup_dn_user_dn_attribute).upper() == 'CN':
+                # Only escape commas if the lookup attribute is CN
+                username = re.subn(r"([^\\]),", r"\1\,", username)[0]
 
         bind_dn_template = self.bind_dn_template
         if isinstance(bind_dn_template, str):
             # bind_dn_template should be of type List[str]
             bind_dn_template = [bind_dn_template]
 
-        for dn in self.bind_dn_template:
-            userdn = dn.format(username=resolved_username)
-            msg = 'Status of user bind {username} with {userdn} : {isBound}'
+        is_bound = False
+        for dn in bind_dn_template:
+            if not dn:
+                self.log.warn("Ignoring blank 'bind_dn_template' entry!")
+                continue
+            userdn = dn.format(username=username)
+            if self.escape_userdn:
+                userdn = escape_filter_chars(userdn)
+            msg = 'Attempting to bind {username} with {userdn}'
+            self.log.debug(msg.format(username=username, userdn=userdn))
+            msg = "Status of user bind {username} with {userdn} : {is_bound}"
             try:
-                conn = getConnection(userdn, username, password)
+                conn = self.get_connection(userdn, password)
             except ldap3.core.exceptions.LDAPBindError as exc:
-                isBound = False
+                is_bound = False
                 msg += '\n{exc_type}: {exc_msg}'.format(
                     exc_type=exc.__class__.__name__,
                     exc_msg=exc.args[0] if exc.args else ''
-                ) 
+                )
             else:
-                isBound = conn.bind()
+                is_bound = conn.bind()
             msg = msg.format(
                 username=username,
                 userdn=userdn,
-                isBound=isBound
+                is_bound=is_bound
             )
-            self.log.debug(msg)                
-            if isBound:
+            self.log.debug(msg)
+            if is_bound:
                 break
 
-        if isBound:
-          
-            # find primary record
-            self.log.warn('Looking for user in base {user_search_base}: {userattr}={username}'.format(user_search_base=self.user_search_base,userattr=self.user_attribute,username=username))
-            conn.search(
-                    search_base=self.user_search_base,
-                    search_scope=ldap3.SUBTREE,
-                    search_filter=self.search_filter.format(userattr=self.user_attribute,username=username),
-                    attributes=self.attributes
-            )
-            if len(conn.response) == 0:
-                self.log.warn('User with {userattr}={username} not found in directory'.format(
-                    userattr=self.user_attribute, username=username))
-                return None
-            elif len(conn.response) > 1:
-                self.log.warn('User with {userattr}={username} found more than {len}-fold in directory'.format(
-                    userattr=self.user_attribute, username=username, len=len(conn.response)))
-                return None
+        if not is_bound:
+            msg = "Invalid password for user '{username}'"
+            self.log.warn(msg.format(username=username))
+            raise ValueError( msg )
 
-            #self.log.error('FOUND elif: %s' % (conn.response[0],))
-            for k,v in conn.response[0]['attributes'].items():
-              self._state[k] = v
-
-            # get the gid name
-            conn.search(
-                    search_base=self.group_search_base,
-                    search_scope=ldap3.SUBTREE,
-                    search_filter="(&(objectclass=posixGroup)(gidNumber={gidNumber}))".format(gidNumber=self._state['gidNumber']),
-                    attributes=self.attributes
-            )
-            if len(conn.response) == 0:
-                self.log.warn("Could not find user's CN for gidNumber %s" % (self._state['gidNumber'],))
-                return None
-            elif len(conn.response) > 1:
-                self.log.warn("Too many matches for user's gidNumber %s" % (self._state['gidNumber'],))
-                return None
-
-            self._state['gidCN'] = conn.response[0]['attributes']['cn'][0]
-
-            # find other group memberships
-            self.log.warn('Looking for groups in base {group_search_base}: {username}'.format(
-              group_search_base=self.user_search_base,
-              username=username) )
-            conn.search(
-                    search_base=self.group_search_base,
-                    search_scope=ldap3.SUBTREE,
-                    search_filter=self.group_search_filter.format(username=username),
-                    attributes=self.attributes
-            )
-            # if len(conn.response) == 0:
-            #     self.log.warn('User {username} not found in any groups'.format(
-            #         username=username))
-            #     return None
-            #el
-            self._state['gidNumbers'] = []
-            self._state['gidCNs'] = []
-            if len(conn.response) > 0:
-                # self.log.error('groups found: %s' % (conn.response,))
-                for item in conn.response:
-                  #self.log.info("    %s: %s" % (item['attributes']['gidNumber'],item['attributes']['cn']))
-                  self._state['gidNumbers'].append( item['attributes']['gidNumber'] )
-                  self._state['gidCNs'].append( item['attributes']['cn'][0] )
-
-            return username
-            
-        else:
-            self.log.warn('Invalid password for user {username}'.format(
+        if self.search_filter:
+            search_filter = self.search_filter.format(
+                userattr=self.user_attribute,
                 username=username,
-            ))
-            return None
+            )
+            conn.search(
+                search_base=self.user_search_base,
+                search_scope=ldap3.SUBTREE,
+                search_filter=search_filter,
+                attributes=self.attributes
+            )
+            n_users = len(conn.response)
+            if n_users == 0:
+                msg = "User with '{userattr}={username}' not found in directory"
+                self.log.warn(msg.format(
+                    userattr=self.user_attribute,
+                    username=username)
+                )
+                raise ValueError( msg )
+            if n_users > 1:
+                msg = (
+                    "Duplicate users found! "
+                    "{n_users} users found with '{userattr}={username}'"
+                )
+                self.log.warn(msg.format(
+                    userattr=self.user_attribute,
+                    username=username,
+                    n_users=n_users)
+                )
+                raise ValueError( msg )
 
+        if self.allowed_groups:
+            self.log.debug('username:%s Using dn %s', username, userdn)
+            found = False
+            for group in self.allowed_groups:
+                group_filter = (
+                    '(|'
+                    '(member={userdn})'
+                    '(uniqueMember={userdn})'
+                    '(memberUid={uid})'
+                    ')'
+                )
+                group_filter = group_filter.format(
+                    userdn=userdn,
+                    uid=username
+                )
+                group_attributes = ['member', 'uniqueMember', 'memberUid']
+                found = conn.search(
+                    group,
+                    search_scope=ldap3.BASE,
+                    search_filter=group_filter,
+                    attributes=group_attributes
+                )
+                if found:
+                    break
+            if not found:
+                # If we reach here, then none of the groups matched
+                msg = 'username:{username} User not in any of the allowed groups'
+                self.log.warn(msg.format(username=username))
+                raise ValueError( msg )
+
+        return conn, is_bound, username
+
+
+    @gen.coroutine
+    def authenticate( self, handler, data):
+        try:
+            conn, is_bound, username = self._authenticate( handler, data )
+        except:
+            return None
+            
+        self.log.warn('Looking for user in base {user_search_base}: {userattr}={username}'.format(user_search_base=self.user_search_base,userattr=self.user_attribute,username=username))
+        conn.search(
+                search_base=self.user_search_base,
+                search_scope=ldap3.SUBTREE,
+                search_filter=self.search_filter.format(userattr=self.user_attribute,username=username),
+                attributes=self.attributes
+        )
+        if len(conn.response) == 0:
+            self.log.warn('User with {userattr}={username} not found in directory'.format(
+                userattr=self.user_attribute, username=username))
+            return None
+        elif len(conn.response) > 1:
+            self.log.warn('User with {userattr}={username} found more than {len}-fold in directory'.format(
+                userattr=self.user_attribute, username=username, len=len(conn.response)))
+            return None
+        for k,v in conn.response[0]['attributes'].items():
+             self._state[k] = v
+
+        # get the gid name
+        conn.search(
+                search_base=self.group_search_base,
+                search_scope=ldap3.SUBTREE,
+                search_filter="(&(objectclass=posixGroup)(gidNumber={gidNumber}))".format(gidNumber=self._state['gidNumber']),
+                attributes=self.attributes
+        )
+        if len(conn.response) == 0:
+            self.log.warn("Could not find user's CN for gidNumber %s" % (self._state['gidNumber'],))
+            return None
+        elif len(conn.response) > 1:
+            self.log.warn("Too many matches for user's gidNumber %s" % (self._state['gidNumber'],))
+            return None
+        self._state['gidCN'] = conn.response[0]['attributes']['cn'][0]
+
+        # find other group memberships
+        self.log.warn('Looking for groups in base {group_search_base}: {username}'.format(
+          group_search_base=self.user_search_base,
+          username=username) )
+        conn.search(
+                search_base=self.group_search_base,
+                search_scope=ldap3.SUBTREE,
+                search_filter=self.group_search_filter.format(username=username),
+                attributes=self.attributes
+        )
+        self._state['gidNumbers'] = []
+        self._state['gidCNs'] = []
+        if len(conn.response) > 0:
+            # self.log.error('groups found: %s' % (conn.response,))
+            for item in conn.response:
+              #self.log.info("    %s: %s" % (item['attributes']['gidNumber'],item['attributes']['cn']))
+              self._state['gidNumbers'].append( item['attributes']['gidNumber'] )
+              self._state['gidCNs'].append( item['attributes']['cn'][0] )
+
+        return str(username)
 
 
 c.JupyterHub.authenticator_class = SLACAuth
@@ -260,6 +286,7 @@ c.LDAPAuthenticator.bind_dn_template = [
 ]
 c.LDAPAuthenticator.user_attribute = 'uid'
 c.LDAPAuthenticator.attributes = ['uidNumber','gidNumber','cn','mail']
+c.LDAPAuthenticator.lookup_dn_user_dn_attribute = 'cn'
 c.LDAPAuthenticator.search_filter = "(&({userattr}={username}))"
 c.LDAPAuthenticator.user_search_base = 'ou=Accounts,dc=slac,dc=stanford,dc=edu'
 
