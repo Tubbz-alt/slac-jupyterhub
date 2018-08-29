@@ -13,7 +13,31 @@ node_defaults:
 node_selectors:
   - filter:
       gnames:
-        - lsst
+        - lsst-a
+        - lsst-b
+        - lsst-c
+        - lsst-d
+        - lsst-e
+        - lsst-f
+        - lsst-g
+        - lsst-h
+        - lsst-i
+        - lsst-j
+        - lsst-k
+        - lsst-l
+        - lsst-m
+        - lsst-n
+        - lsst-o
+        - lsst-p
+        - lsst-q
+        - lsst-r
+        - lsst-s
+        - lsst-t
+        - lsst-u
+        - lsst-v
+        - lsst-w
+        - lsst-y
+        - lsst-z
         - lsst-ccs
       images:
         - jld-lab
@@ -38,17 +62,56 @@ node_selectors:
       images:
         - slac-jupyterlab-gpu
     spawn_on:
-      # group: ocio
+      group: ocio
       accelerator: nvidia
     spec:
-        volumes:
+        volumes: 
           - name: local-home
             persistentVolumeClaim:
               claimName: local-home
-        volume_mounts:
+          #- name: scratch
+          #  persistentVolumeClaim:
+          #    claimName: scratch
+        volume_mounts: 
           - name: local-home
             mountPath: '/home/'
+          #- name: scratch
+          #  mountPath: '/scratch/'
         cpu: 4
         memory: 10G
         extra_resource_limits:
           nvidia.com/gpu: "1"
+
+  - filter:
+      images:
+        - cryosparc-docker
+    spawn_on:
+      group: cryoem
+      accelerator: nvidia
+    spec:
+        volumes:
+          - name: cryoem-home
+            persistentVolumeClaim:
+              claimName: cryoem-home
+          - name: cryoem-exp
+            persistentVolumeClaim:
+              claimName: cryoem-exp
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+        volume_mounts:
+          - name: cryoem-home
+            mountPath: '/gpfs/slac/cryo/fs1/u/'
+          - name: cryoem-exp
+            mountPath: '/gpfs/slac/cryo/fs1/exp/'
+          - name: scratch
+            mountPath: '/scratch/'
+        cpu: 4
+        memory: 12G
+        extra_resource_limits:
+          nvidia.com/gpu: "2"
+        env:
+          CRYOSPARC_HTTP_PORT: 8888
+          CRYOSPARC_LICENSE_ID: 4f065494-09ee-5912-b923-e1b06341d95f
+          HOMEDIRS: '/gpfs/slac/cryo/fs1/u/'
+          EXP_DIR: '/gpfs/slac/cryo/fs1/exp/'
