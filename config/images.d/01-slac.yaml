@@ -1,9 +1,12 @@
 
-title: "SLAC JupyterLab Images"
+title: "SLAC Machine Learning Images"
 images:
-#  - image: slaclab/slac-jupyterlab
-#    description: SLAC JupyterLab Image
-  - image: slaclab/slac-jupyterlab-gpu
-    description: SLAC JupyterLab Image (GPU)
-
+#  - image: slaclab/slac-jupyterlab-gpu
+#    description: SLAC JupyterLab Image (GPU)
+  - image: slaclab/slac-jupyterlab-gpu:20180828.0
+    description: SLAC JupyterLab Image (GPU) v20180828.0
+  - image: slaclab/slac-jupyterlab-gpu:20180827.0
+    description: SLAC JupyterLab Image (GPU) v20180827.0
+  - image: slaclab/slac-jupyterlab-gpu:20180824.0
+    description: SLAC JupyterLab Image (GPU) v20180824.0
 
