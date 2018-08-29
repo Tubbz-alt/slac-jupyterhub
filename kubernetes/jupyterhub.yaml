@@ -24,6 +24,11 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: hub
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30s"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "20s"
+    nginx.ingress.kubernetes.io/client-max-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   tls:
     - hosts:
@@ -31,6 +36,7 @@ spec:
       secretName: tls-certificate
   rules:
     - host: ${hub_url} 
+    #- host:
       http:
         paths:
         - path: /
@@ -191,5 +197,7 @@ spec:
               path: node-selectors.yaml
             - key: 01-slac.yaml
               path: images.d/01-slac.yaml
+            - key: 02-cryoem.yaml
+              path: images.d/02-cryoem.yaml
             - key: 05-lsst.yaml
               path: images.d/05-lsst.yaml
