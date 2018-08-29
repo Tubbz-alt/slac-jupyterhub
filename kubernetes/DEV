@@ -5,8 +5,8 @@ export environment=dev
 # web configuration
 ###
 export hub_url="jupyter-dev.slac.stanford.edu"
-export hub_cert_file="../../certs/jupyter_slac_stanford_edu_cert.cer"
-export hub_key_file="../../certs/jupyter.key"
+export hub_cert_file="../../certs/jupyter-dev/tls.crt"
+export hub_key_file="../../certs/jupyter-dev/tls.key"
 
 ###
 # hub persistent db storage
@@ -18,12 +18,12 @@ export hub_crypto_key="ac21128104346d4c6054728430d69ffe498f1545a8960f3173d6e65ba
 ###
 # hub image
 ###
-export hub_image="slaclab/jupyterhub:latest"
+export hub_image="slaclab/jupyterhub:20180828.0"
 
 ###
 # jupyter lab storage
 ###
-export local_home="/home"
+export local_home="/scratch/local-home"
 export generic_user_home="/mnt/generic-users"
 
 ###
