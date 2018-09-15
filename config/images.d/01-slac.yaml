@@ -3,6 +3,8 @@ title: "SLAC Machine Learning Images"
 images:
 #  - image: slaclab/slac-jupyterlab-gpu
 #    description: SLAC JupyterLab Image (GPU)
+  - image: slaclab/slac-jupyterlab-gpu:20180914.0
+    description: SLAC JupyterLab Image (GPU) v20180914.0
   - image: slaclab/slac-jupyterlab-gpu:20180828.0
     description: SLAC JupyterLab Image (GPU) v20180828.0
   - image: slaclab/slac-jupyterlab-gpu:20180827.0
