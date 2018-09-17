@@ -37,6 +37,40 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
+  name: ${namespace}--gpfs
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--gpfs
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /gpfs/
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--nfs
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--nfs
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /nfs/
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
   name: ${namespace}--lsst-data
   labels:
     type: local

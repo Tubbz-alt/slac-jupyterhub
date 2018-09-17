@@ -13,6 +13,7 @@ node_defaults:
 node_selectors:
   - filter:
       gnames:
+        - lsst
         - lsst-a
         - lsst-b
         - lsst-c
@@ -72,11 +73,21 @@ node_selectors:
           #- name: scratch
           #  persistentVolumeClaim:
           #    claimName: scratch
+          - name: gpfs
+            persistentVolumeClaim:
+              claimName: gpfs
+          - name: nfs
+            persistentVolumeClaim:
+              claimName: nfs
         volume_mounts: 
           - name: local-home
             mountPath: '/home/'
           #- name: scratch
           #  mountPath: '/scratch/'
+          - name: nfs
+            mountPath: '/nfs/'
+          - name: gpfs
+            mountPath: '/gpfs/'
         cpu: 4
         memory: 10G
         extra_resource_limits:
@@ -111,7 +122,7 @@ node_selectors:
         extra_resource_limits:
           nvidia.com/gpu: "2"
         env:
-          CRYOSPARC_HTTP_PORT: 8888
-          CRYOSPARC_LICENSE_ID: 4f065494-09ee-5912-b923-e1b06341d95f
+          CRYOSPARC_HTTP_PORT: 39000
+          CRYOSPARC_LICENSE_ID: 08558f50-a6f5-11e8-aadc-6715b98a5809
           HOMEDIRS: '/gpfs/slac/cryo/fs1/u/'
           EXP_DIR: '/gpfs/slac/cryo/fs1/exp/'

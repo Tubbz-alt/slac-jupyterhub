@@ -28,6 +28,32 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
+  name: gpfs
+spec:
+  storageClassName: ${namespace}--gpfs
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nfs
+spec:
+  storageClassName: ${namespace}--nfs
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
   name: lsst-data
 spec:
   storageClassName: ${namespace}--lsst-data
