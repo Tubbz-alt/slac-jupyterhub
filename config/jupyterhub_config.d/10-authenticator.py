@@ -48,17 +48,12 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
     @gen.coroutine
     def pre_spawn_start(self, user, spawner):
 
+        # self.log.info("ENV: %s" % os.environ )
+
         # First pulls can be really slow for the LSST stack containers,
         #  so let's give it a big timeout
         spawner.http_timeout = 60 * 15
         spawner.start_timeout = 60 * 15
-
-        #self.log.info("ENV: %s" % os.environ )
-        # The spawned containers need to be able to talk to the hub through
-        #  the proxy!
-        spawner.hub_connect_port = int(os.environ['HUB_SERVICE_PORT'])
-        spawner.hub_connect_ip = os.environ['HUB_SERVICE_HOST']
-        #spawner.environment['JUPYTERHUB_API_URL'] = 'bollocks' #"http://%s:%s/hub/api" % (os.getenv('HUB_SERVICE_HOST'), os.getenv('HUB_SERVICE_PORT_API') )
 
         # Set up memory and CPU upper/lower bounds
         spawner.mem_limit = os.getenv('LAB_MEM_LIMIT') or '2G'
@@ -72,8 +67,6 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
 
         if 'uidNumber' in self._state:
             spawner.environment['EXTERNAL_UID'] = str( self._state["uidNumber"] )
-        #spawner.uid = self._state["uidNumber"]
-        #spawner.fs_gid = self._state["gidNumber"]
 
         if 'gidCN' in self._state and 'gidNumber' in self._state:
             tuples = [ '%s:%s' % (self._state['gidCN'],self._state['gidNumber']) ]
