@@ -48,12 +48,10 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
     @gen.coroutine
     def pre_spawn_start(self, user, spawner):
 
-        # self.log.info("ENV: %s" % os.environ )
-
         # First pulls can be really slow for the LSST stack containers,
         #  so let's give it a big timeout
-        spawner.http_timeout = 60 * 15
-        spawner.start_timeout = 60 * 15
+        spawner.http_timeout = 60 * 6
+        spawner.start_timeout = 60 * 6
 
         # Set up memory and CPU upper/lower bounds
         spawner.mem_limit = os.getenv('LAB_MEM_LIMIT') or '2G'
@@ -65,17 +63,14 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
         spawner.default_url = '/lab'
         spawner.image_pull_policy = 'Always'
 
-        if 'uidNumber' in self._state:
-            spawner.environment['EXTERNAL_UID'] = str( self._state["uidNumber"] )
+        # set uid and gid permissions
+        u = str(user).split()[0].replace('<User(','') # wow... hack or what?
+        ext_uid, ext_groups = self._getUserGroup( u )
+        spawner.environment['EXTERNAL_UID'] = str(ext_uid)
+        spawner.environment['EXTERNAL_GROUPS'] = ','.join( ext_groups )
+        spawner.user_gids = ext_groups
 
-        if 'gidCN' in self._state and 'gidNumber' in self._state:
-            tuples = [ '%s:%s' % (self._state['gidCN'],self._state['gidNumber']) ]
-            for i,n in enumerate(self._state["gidNumbers"]):
-                tuples.append( '%s:%s' % (self._state['gidCNs'][i],n) )
-            spawner.environment['EXTERNAL_GROUPS'] = ','.join( tuples )
-            spawner.user_gids = tuples 
-
-        self.log.info("Spawning for %s with environment: %s" % (str(user), json.dumps(spawner.environment, sort_keys=True, indent=4)) )
+        self.log.info("Spawning for %s with environment: %s" % (str(user), json.dumps(spawner.environment)) ) 
 
 
     def _authenticate(self, handler, data):
@@ -208,66 +203,77 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
 
         return conn, is_bound, username
 
-
-    @gen.coroutine
-    def authenticate( self, handler, data):
-        try:
-            conn, is_bound, username = self._authenticate( handler, data )
-        except:
-            return None
+    def _getUserGroup( self, username ):
             
-        self.log.warn('Looking for user in base {user_search_base}: {userattr}={username}'.format(user_search_base=self.user_search_base,userattr=self.user_attribute,username=username))
-        conn.search(
+        self.log.debug('Looking for user in base {user_search_base}: {userattr}={username}'.format(user_search_base=self.user_search_base,userattr=self.user_attribute,username=username))
+        data = {}
+        try:
+            _conn = self._state['conn']
+        except:
+            raise Exception('Please log-out and log-back in to proceed.')
+
+        _conn.search(
                 search_base=self.user_search_base,
                 search_scope=ldap3.SUBTREE,
                 search_filter=self.search_filter.format(userattr=self.user_attribute,username=username),
                 attributes=self.attributes
         )
-        if len(conn.response) == 0:
-            self.log.warn('User with {userattr}={username} not found in directory'.format(
+        if len(_conn.response) == 0:
+            raise Exception('User with {userattr}={username} not found in directory'.format(
                 userattr=self.user_attribute, username=username))
-            return None
-        elif len(conn.response) > 1:
-            self.log.warn('User with {userattr}={username} found more than {len}-fold in directory'.format(
-                userattr=self.user_attribute, username=username, len=len(conn.response)))
-            return None
-        for k,v in conn.response[0]['attributes'].items():
-             self._state[k] = v
+        elif len(_conn.response) > 1:
+            raise Exception('User with {userattr}={username} found more than {len}-fold in directory'.format(
+                userattr=self.user_attribute, username=username, len=len(_conn.response)))
+        for k,v in _conn.response[0]['attributes'].items():
+             data[k] = v
 
         # get the gid name
-        conn.search(
+        _conn.search(
                 search_base=self.group_search_base,
                 search_scope=ldap3.SUBTREE,
-                search_filter="(&(objectclass=posixGroup)(gidNumber={gidNumber}))".format(gidNumber=self._state['gidNumber']),
+                search_filter="(&(objectclass=posixGroup)(gidNumber={gidNumber}))".format(gidNumber=data['gidNumber']),
                 attributes=self.attributes
         )
-        if len(conn.response) == 0:
-            self.log.warn("Could not find user's CN for gidNumber %s" % (self._state['gidNumber'],))
-            return None
-        elif len(conn.response) > 1:
-            self.log.warn("Too many matches for user's gidNumber %s" % (self._state['gidNumber'],))
-            return None
-        self._state['gidCN'] = conn.response[0]['attributes']['cn'][0]
+        if len(_conn.response) == 0:
+            raise Exception( "Could not find user's CN for gidNumber %s" % (data['gidNumber'],) )
+        elif len(_conn.response) > 1:
+            raise Exception("Too many matches for user's gidNumber %s" % (data['gidNumber'],) )
+            
+        data['gidCN'] = _conn.response[0]['attributes']['cn'][0]
 
         # find other group memberships
-        self.log.warn('Looking for groups in base {group_search_base}: {username}'.format(
+        self.log.debug('Looking for groups in base {group_search_base}: {username}'.format(
           group_search_base=self.user_search_base,
           username=username) )
-        conn.search(
+        _conn.search(
                 search_base=self.group_search_base,
                 search_scope=ldap3.SUBTREE,
                 search_filter=self.group_search_filter.format(username=username),
                 attributes=self.attributes
         )
-        self._state['gidNumbers'] = []
-        self._state['gidCNs'] = []
-        if len(conn.response) > 0:
-            # self.log.error('groups found: %s' % (conn.response,))
-            for item in conn.response:
+        
+        data['gidNumbers'] = []
+        data['gidCNs'] = []
+        if len(_conn.response) > 0:
+            # self.log.error('groups found: %s' % (_conn.response,))
+            for item in _conn.response:
               #self.log.info("    %s: %s" % (item['attributes']['gidNumber'],item['attributes']['cn']))
-              self._state['gidNumbers'].append( item['attributes']['gidNumber'] )
-              self._state['gidCNs'].append( item['attributes']['cn'][0] )
+              data['gidNumbers'].append( item['attributes']['gidNumber'] )
+              data['gidCNs'].append( item['attributes']['cn'][0] )
 
+        tuples = [ '%s:%s' % (data['gidCN'], data['gidNumber']) ]
+        for i,n in enumerate(data["gidNumbers"]):
+            tuples.append( '%s:%s' % (data['gidCNs'][i],n) )
+        
+        return data['uidNumber'], tuples
+        
+
+    @gen.coroutine
+    def authenticate( self, handler, data):
+        try:
+            self._state['conn'], is_bound, username = self._authenticate( handler, data )
+        except:
+            return None
         return str(username)
 
 
