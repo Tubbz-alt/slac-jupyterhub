@@ -207,17 +207,25 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
             
         self.log.debug('Looking for user in base {user_search_base}: {userattr}={username}'.format(user_search_base=self.user_search_base,userattr=self.user_attribute,username=username))
         data = {}
-        try:
-            _conn = self._state['conn']
-        except:
-            raise Exception('Please log-out and log-back in to proceed.')
+        _conn = None
+        retry = 3
+        while retry > 0:
+            try:
+                self.log.info("connecting to ldap...")
+                _conn = self._state['conn']
+                _conn.search(
+                    search_base=self.user_search_base,
+                    search_scope=ldap3.SUBTREE,
+                    search_filter=self.search_filter.format(userattr=self.user_attribute,username=username),
+                    attributes=self.attributes
+                )
+                retry = 0
+            except Exception as e:
+                self.log.warn("Error connecting to ldap: %s" % (e,))
+                retry = retry - 1
+                if retry == 0:
+                    raise Exception('Please log-out and log-back in to proceed.')
 
-        _conn.search(
-                search_base=self.user_search_base,
-                search_scope=ldap3.SUBTREE,
-                search_filter=self.search_filter.format(userattr=self.user_attribute,username=username),
-                attributes=self.attributes
-        )
         if len(_conn.response) == 0:
             raise Exception('User with {userattr}={username} not found in directory'.format(
                 userattr=self.user_attribute, username=username))
@@ -271,6 +279,7 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
     @gen.coroutine
     def authenticate( self, handler, data):
         try:
+            self.log.info("authenticate()")
             self._state['conn'], is_bound, username = self._authenticate( handler, data )
         except:
             return None
