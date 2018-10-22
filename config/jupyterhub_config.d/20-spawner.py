@@ -56,7 +56,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
     def options_form(self):
 
         conf_files = glob.glob( self.images_config_d + '/*.yaml' )
-        self.log.info("Loading Image Selector from %s" % (conf_files))
+        #self.log.info("Loading Image Selector from %s" % (conf_files))
         images = []
         # for each file read yaml
         for f in conf_files:
@@ -247,7 +247,7 @@ c.SLACSpawner.images_config_d = '/opt/jupyterhub/config/images.d/'
 c.SLACSpawner.start_timeout = 60
 c.SLACSpawner.http_timeout = 60
 
-c.SLACSpawner.privileged = True
+#c.SLACSpawner.privileged = True
 
 
 
