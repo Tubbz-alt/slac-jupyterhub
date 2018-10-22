@@ -211,8 +211,11 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
         retry = 3
         while retry > 0:
             try:
-                self.log.info("connecting to ldap...")
-                _conn = self._state['conn']
+                self.log.info("searching ldap...")
+                # _conn = self._state['conn']
+                server = ldap3.Server( self.server_address, port=self.server_port, use_ssl=self.use_ssl )
+                _conn = ldap3.Connection( server )
+                _conn.bind()
                 _conn.search(
                     search_base=self.user_search_base,
                     search_scope=ldap3.SUBTREE,
