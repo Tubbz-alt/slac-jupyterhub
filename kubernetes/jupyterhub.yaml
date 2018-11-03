@@ -85,12 +85,12 @@ spec:
   selector:
     matchLabels:
       name: hub
-  minReadySeconds: 10
+  minReadySeconds: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 1 
   template:
     metadata:
       labels:
@@ -115,6 +115,18 @@ spec:
             -
               containerPort: 8000
               name: hub
+          livenessProbe:
+            httpGet:
+              path: /hub/login
+              port: 8000
+            initialDelaySeconds: 5 
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /hub/login
+              port: 8000
+            initialDelaySeconds: 5 
+            periodSeconds: 10
           env:
             - name: LOGLEVEL
               value: DEBUG
@@ -201,3 +213,7 @@ spec:
               path: images.d/02-cryoem.yaml
             - key: 05-lsst.yaml
               path: images.d/05-lsst.yaml
+            - key: 06-cdms.yaml
+              path: images.d/06-cdms.yaml
+
+
