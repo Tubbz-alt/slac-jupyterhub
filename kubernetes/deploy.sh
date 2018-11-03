@@ -41,11 +41,9 @@ gen_template "secrets.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
 
 # create the storage pv
 gen_template "pv.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
-gen_template "pv-cryoem.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
 
 # create pvcs
 gen_template "pvc.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
-gen_template "pvc-cryoem.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
 
 # create the hub
 # this doesn't work for some reason
