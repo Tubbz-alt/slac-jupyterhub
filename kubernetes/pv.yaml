@@ -71,6 +71,41 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
+  name: ${namespace}--scratch
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--scratch
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /scratch/
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--tmp
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--tmp
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/
+
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
   name: ${namespace}--lsst-data
   labels:
     type: local

@@ -54,6 +54,32 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
+  name: scratch
+spec:
+  storageClassName: ${namespace}--scratch
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tmp
+spec:
+  storageClassName: ${namespace}--tmp
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
   name: lsst-data
 spec:
   storageClassName: ${namespace}--lsst-data
