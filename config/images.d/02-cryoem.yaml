@@ -1,6 +1,8 @@
 
 title: "SLAC CryoEM CryoSPARC Images"
 images:
+  - image: slaclab/cryosparc-docker:2.4-0
+    description: cryoSPARC v2.4 (GPU)
   - image: slaclab/cryosparc-docker:2.0.27-0
-    description: cryoSPARC v2 (GPU)
+    description: cryoSPARC v2.0.27 (GPU)
 

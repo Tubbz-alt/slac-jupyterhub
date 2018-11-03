@@ -1,6 +1,6 @@
 images:
-- {description: Weekly 2018_41, image: 'lsstsqre/jld-lab:w201841'}
-- {description: Weekly 2018_40, image: 'lsstsqre/jld-lab:w201840'}
+- {description: Weekly 2018_43, image: 'lsstsqre/jld-lab:w201843'}
+- {description: Weekly 2018_42, image: 'lsstsqre/jld-lab:w201842'}
 - {description: Release 16.0, image: 'lsstsqre/jld-lab:r160'}
 title: LSST lsstsqre/jld-lab Images
-updated: Tue Oct 16 18:09:57 2018 UTC
+updated: Mon Oct 29 22:00:09 2018 UTC
