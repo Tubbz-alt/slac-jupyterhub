@@ -33,3 +33,6 @@ $( cat ${slac_images_file}  | sed 's/^/    /' )
     
 $( cat ${lsst_images_file}  | sed 's/^/    /' )
 
+  06-cdms.yaml: |-
+
+$( cat ${cdms_images_file}  | sed 's/^/    /' )
