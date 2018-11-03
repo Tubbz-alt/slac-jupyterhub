@@ -11,6 +11,7 @@ node_defaults:
         mountPath: '/home/'
   
 node_selectors:
+  
   - filter:
       gnames:
         - lsst
@@ -45,18 +46,28 @@ node_selectors:
     spawn_on:
       group: lsst
     spec:
-      volumes:
-        - name: lsst-home
-          persistentVolumeClaim:
-            claimName: lsst-home
-        - name: lsst-data
-          persistentVolumeClaim:
-            claimName: lsst-data
-      volume_mounts:
-        - name: 'lsst-home'
-          mountPath: '/home/'
-        - name: 'lsst-data'
-          mountPath: '/data/'
+        volumes:
+          - name: lsst-home
+            persistentVolumeClaim:
+              claimName: lsst-home
+          - name: lsst-data
+            persistentVolumeClaim:
+              claimName: lsst-data
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
+        volume_mounts:
+          - name: 'lsst-home'
+            mountPath: '/home/'
+          - name: 'lsst-data'
+            mountPath: '/data/'
+          - name: scratch
+            mountPath: '/scratch/'
+          - name: tmp
+            mountPath: '/tmp/'
         
 
   - filter:
@@ -70,9 +81,12 @@ node_selectors:
           - name: local-home
             persistentVolumeClaim:
               claimName: local-home
-          #- name: scratch
-          #  persistentVolumeClaim:
-          #    claimName: scratch
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
           - name: gpfs
             persistentVolumeClaim:
               claimName: gpfs
@@ -82,8 +96,10 @@ node_selectors:
         volume_mounts: 
           - name: local-home
             mountPath: '/home/'
-          #- name: scratch
-          #  mountPath: '/scratch/'
+          - name: scratch
+            mountPath: '/scratch/'
+          - name: tmp
+            mountPath: '/tmp/'
           - name: nfs
             mountPath: '/nfs/'
           - name: gpfs
@@ -95,28 +111,65 @@ node_selectors:
 
   - filter:
       images:
+        - cdms-jupyterlab
+    spawn_on:
+      group: ocio
+    spec:
+        volumes:
+          - name: local-home
+            persistentVolumeClaim:
+              claimName: local-home
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
+          - name: gpfs
+            persistentVolumeClaim:
+              claimName: gpfs
+          - name: nfs
+            persistentVolumeClaim:
+              claimName: nfs
+        volume_mounts:
+          - name: local-home
+            mountPath: '/home/'
+          - name: scratch
+            mountPath: '/scratch/'
+          - name: tmp
+            mountPath: '/tmp/'
+          - name: nfs
+            mountPath: '/nfs/'
+          - name: gpfs
+            mountPath: '/gpfs/'
+        cpu: 4
+        memory: 10G
+
+
+  - filter:
+      images:
         - cryosparc-docker
     spawn_on:
       group: cryoem
       accelerator: nvidia
     spec:
         volumes:
-          - name: cryoem-home
+          - name: gpfs
             persistentVolumeClaim:
-              claimName: cryoem-home
-          - name: cryoem-exp
-            persistentVolumeClaim:
-              claimName: cryoem-exp
+              claimName: gpfs
           - name: scratch
             persistentVolumeClaim:
               claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
         volume_mounts:
-          - name: cryoem-home
-            mountPath: '/gpfs/slac/cryo/fs1/u/'
-          - name: cryoem-exp
-            mountPath: '/gpfs/slac/cryo/fs1/exp/'
+          - name: gpfs
+            mountPath: '/gpfs/'
           - name: scratch
             mountPath: '/scratch/'
+          - name: scratch
+            mountPath: '/tmp/'
         cpu: 4
         memory: 12G
         extra_resource_limits:
@@ -125,4 +178,3 @@ node_selectors:
           CRYOSPARC_HTTP_PORT: 39000
           CRYOSPARC_LICENSE_ID: 08558f50-a6f5-11e8-aadc-6715b98a5809
           HOMEDIRS: '/gpfs/slac/cryo/fs1/u/'
-          EXP_DIR: '/gpfs/slac/cryo/fs1/exp/'
