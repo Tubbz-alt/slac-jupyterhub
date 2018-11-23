@@ -78,9 +78,9 @@ node_selectors:
       accelerator: nvidia
     spec:
         volumes: 
-          - name: local-home
+          - name: jupyter-home
             persistentVolumeClaim:
-              claimName: local-home
+              claimName: jupyter-home
           - name: scratch
             persistentVolumeClaim:
               claimName: scratch
@@ -94,7 +94,7 @@ node_selectors:
             persistentVolumeClaim:
               claimName: nfs
         volume_mounts: 
-          - name: local-home
+          - name: jupyter-home
             mountPath: '/home/'
           - name: scratch
             mountPath: '/scratch/'
@@ -116,9 +116,9 @@ node_selectors:
       group: ocio
     spec:
         volumes:
-          - name: local-home
+          - name: jupyter-home
             persistentVolumeClaim:
-              claimName: local-home
+              claimName: jupyter-home
           - name: scratch
             persistentVolumeClaim:
               claimName: scratch
@@ -132,7 +132,7 @@ node_selectors:
             persistentVolumeClaim:
               claimName: nfs
         volume_mounts:
-          - name: local-home
+          - name: jupyter-home
             mountPath: '/home/'
           - name: scratch
             mountPath: '/scratch/'

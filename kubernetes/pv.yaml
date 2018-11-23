@@ -37,6 +37,23 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
+  name: ${namespace}--jupyter-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--jupyter-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: ${jupyter_home}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
   name: ${namespace}--gpfs
   labels:
     type: local

@@ -98,8 +98,7 @@ spec:
     spec:
       serviceAccountName: ${namespace}-${environment}
       nodeSelector:
-        group: ocio
-        jupyter_role: hub
+$(list=(${hub__nodeSelectors// / }); for k in "${!list[@]}"; do kv=(${list[k]//\=/ }); echo "        ${kv[0]}: ${kv[1]}"; done)
       containers:
         - name: hub
           imagePullPolicy: "Always"

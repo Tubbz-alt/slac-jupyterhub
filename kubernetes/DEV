@@ -17,8 +17,9 @@ export hub_crypto_key="ac21128104346d4c6054728430d69ffe498f1545a8960f3173d6e65ba
 
 ###
 # hub image
-###
-export hub_image="slaclab/jupyterhub:20180828.0"
+##
+#export hub_image="slaclab/jupyterhub:20181010.0"
+export hub_image="slaclab/jupyterhub:20181103.0"
 
 ###
 # jupyter lab storage

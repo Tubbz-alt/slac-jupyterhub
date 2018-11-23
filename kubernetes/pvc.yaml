@@ -28,6 +28,19 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
+  name: jupyter-home
+spec:
+  storageClassName: ${namespace}--jupyter-home
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
   name: gpfs
 spec:
   storageClassName: ${namespace}--gpfs
