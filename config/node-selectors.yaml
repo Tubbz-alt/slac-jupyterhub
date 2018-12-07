@@ -75,6 +75,7 @@ node_selectors:
         - slac-jupyterlab-gpu
     spawn_on:
       group: ocio
+      storage: gpfs
       accelerator: nvidia
     spec:
         volumes: 
@@ -114,6 +115,7 @@ node_selectors:
         - cdms-jupyterlab
     spawn_on:
       group: ocio
+      storage: gpfs
     spec:
         volumes:
           - name: jupyter-home
