@@ -152,3 +152,19 @@ spec:
   hostPath:
     path: ${lsst_home}
 
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--cdms-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--cdms-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: ${cdms_home}

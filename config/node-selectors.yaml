@@ -118,9 +118,9 @@ node_selectors:
       storage: gpfs
     spec:
         volumes:
-          - name: jupyter-home
+          - name: cdms-home
             persistentVolumeClaim:
-              claimName: jupyter-home
+              claimName: cdms-home
           - name: scratch
             persistentVolumeClaim:
               claimName: scratch
@@ -134,7 +134,7 @@ node_selectors:
             persistentVolumeClaim:
               claimName: nfs
         volume_mounts:
-          - name: jupyter-home
+          - name: cdms-home
             mountPath: '/home/'
           - name: scratch
             mountPath: '/scratch/'
@@ -153,6 +153,7 @@ node_selectors:
         - cryosparc-docker
     spawn_on:
       group: cryoem
+      storage: gpfs
       accelerator: nvidia
     spec:
         volumes:
@@ -175,8 +176,9 @@ node_selectors:
         cpu: 4
         memory: 12G
         extra_resource_limits:
-          nvidia.com/gpu: "2"
+          nvidia.com/gpu: "4"
         env:
           CRYOSPARC_HTTP_PORT: 39000
           CRYOSPARC_LICENSE_ID: 08558f50-a6f5-11e8-aadc-6715b98a5809
+          #CRYOSPARC_LICENSE_ID: 669505a2-e10e-11e8-809a-cb98feda5c1e
           HOMEDIRS: '/gpfs/slac/cryo/fs1/u/'
