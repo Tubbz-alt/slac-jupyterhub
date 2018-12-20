@@ -2,15 +2,18 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: ${namespace}-${environment}
+  # name: ${namespace}-${environment}
+  name: hub-rolebinding 
 subjects:
 - kind: ServiceAccount
-  name: ${namespace}-${environment}
+  #name: ${namespace}-${environment}
+  name: "hub"
   namespace: ${namespace}
   apiGroup: ""
 roleRef:
   kind: Role
-  name: ${namespace}-${environment}
+  #name: ${namespace}-${environment}
+  name: "hub-role"
   apiGroup: ""
 
 ---
@@ -18,7 +21,9 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ${namespace}-${environment}
+  # name: ${namespace}-${environment}
+  name: "hub"
+  namespace: ${namespace}
 
 ---
 
@@ -26,8 +31,12 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: ${namespace}
-  name: ${namespace}-${environment}
+  # name: ${namespace}-${environment}
+  name: "hub-role"
 rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["get", "list", "create", "watch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch" ]

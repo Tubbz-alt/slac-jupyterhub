@@ -96,7 +96,8 @@ spec:
       labels:
         name: hub
     spec:
-      serviceAccountName: ${namespace}-${environment}
+      #serviceAccountName: ${namespace}-${environment}
+      serviceAccountName: "hub"
       nodeSelector:
 $(list=(${hub__nodeSelectors// / }); for k in "${!list[@]}"; do kv=(${list[k]//\=/ }); echo "        ${kv[0]}: ${kv[1]}"; done)
       containers:
