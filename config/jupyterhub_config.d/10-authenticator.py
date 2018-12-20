@@ -50,8 +50,8 @@ class SLACAuth(ldapauthenticator.LDAPAuthenticator):
 
         # First pulls can be really slow for the LSST stack containers,
         #  so let's give it a big timeout
-        spawner.http_timeout = 60 * 6
-        spawner.start_timeout = 60 * 6
+        spawner.http_timeout = 60 * 10 
+        spawner.start_timeout = 60 * 10
 
         # Set up memory and CPU upper/lower bounds
         spawner.mem_limit = os.getenv('LAB_MEM_LIMIT') or '2G'
