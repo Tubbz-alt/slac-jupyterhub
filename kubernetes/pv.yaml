@@ -131,7 +131,7 @@ spec:
   capacity:
     storage: 10000Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   hostPath:
     path: ${lsst_data}
 
@@ -151,6 +151,23 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: ${lsst_home}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--cdms-data
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--cdms-data
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: ${cdms_data}
 
 ---
 

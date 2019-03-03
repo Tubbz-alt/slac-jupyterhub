@@ -25,4 +25,4 @@ function gen_template() {
 # create the namespace for this project
 kubectl delete namespace ${namespace} -R
 
-kubectl delete pv ${namespace}--generic-user-home ${namespace}--hub-data ${namespace}--local-home ${namespace}--jupyter-home ${namespace}--lsst-data ${namespace}--lsst-home ${namespace}--cdms-home ${namespace}--gpfs ${namespace}--nfs ${namespace}--scratch ${namespace}--tmp
+kubectl delete pv ${namespace}--generic-user-home ${namespace}--hub-data ${namespace}--local-home ${namespace}--jupyter-home ${namespace}--lsst-data ${namespace}--lsst-home ${namespace}--cdms-data ${namespace}--cdms-home ${namespace}--gpfs ${namespace}--nfs ${namespace}--scratch ${namespace}--tmp
