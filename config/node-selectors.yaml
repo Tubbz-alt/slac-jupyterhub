@@ -1,6 +1,6 @@
 node_defaults:
   spawn_on:
-    group: ocio
+    storage/staas: "true"
   spec:
     volumes:
       - name: local-home
@@ -44,7 +44,8 @@ node_selectors:
       images:
         - sciplat-lab
     spawn_on:
-      group_lsst: "true"
+      group/lsst: "true"
+      storage/lsst: "true"
     spec:
         volumes:
           - name: lsst-home
@@ -78,8 +79,8 @@ node_selectors:
       images:
         - slac-jupyterlab-gpu
     spawn_on:
-      group_cryoem: "yes"
-      storage: gpfs
+      group/cryoem: "true"
+      storage/cryoem: "true"
       accelerator: nvidia
     spec:
         volumes:
@@ -113,13 +114,15 @@ node_selectors:
         memory: 10G
         extra_resource_limits:
           nvidia.com/gpu: "1"
+        extra_pod_config:
+          hostIPC: True
 
   - filter:
       images:
         - slac-jupyterlab-gpu
     spawn_on:
-      group_ocio: "yes"
-      storage: gpfs
+      group/any: "true"
+      storage/staas: "true"
       accelerator: nvidia
     spec:
         volumes: 
@@ -153,8 +156,8 @@ node_selectors:
       images:
         - cdms-jupyterlab
     spawn_on:
-      group_cdms: "true"
-      storage: gpfs
+      group/cdms: "true"
+      storage/staas: "true"
     spec:
         volumes:
           - name: cdms-home
@@ -191,8 +194,8 @@ node_selectors:
       images:
         - cryosparc-docker
     spawn_on:
-      group_cryoem: "true"
-      storage: gpfs
+      group/cryoem: "true"
+      storage/cryoem: "true"
       accelerator: nvidia
     spec:
         volumes:
@@ -215,7 +218,7 @@ node_selectors:
         cpu: 4
         memory: 12G
         extra_resource_limits:
-          nvidia.com/gpu: "4"
+          nvidia.com/gpu: "2"
         env:
           CRYOSPARC_HTTP_PORT: 39000
           CRYOSPARC_LICENSE_ID: 08558f50-a6f5-11e8-aadc-6715b98a5809
