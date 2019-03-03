@@ -228,7 +228,9 @@ class SLACSpawner(kubespawner.KubeSpawner):
             lifecycle_hooks=self.lifecycle_hooks,
             init_containers=self.init_containers,
             service_account=None,
+            extra_pod_config=spec['extra_pod_config'] if 'extra_pod_config' in spec else {},
             # extra_container_config = { 'securityContext': { 'capabilities': { 'add': [ 'ALL',  ] }  } },
+            extra_container_config=spec['extra_container_config'] if 'extra_container_config' in spec else {},
         )
 
     def options_from_form(self, formdata=None):
