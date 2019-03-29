@@ -15,6 +15,7 @@ export hub__nodeSelectors="storage/staas='true'"
 export hub_data="/gpfs/slac/staas/fs1/g/jupyter/jupyterhub-dev"
 export session_db_url="sqlite:////home/jupyter/jupyterhub.sqlite"
 export hub_crypto_key="ac21128104346d4c6054728430d69ffe498f1545a8960f3173d6e65ba5ee3f71"
+export hub_google_oauth_clientid="../../certs/jupyter-dev/google_oauth_clientid"
 
 ###
 # hub image

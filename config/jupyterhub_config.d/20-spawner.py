@@ -146,6 +146,10 @@ class SLACSpawner(kubespawner.KubeSpawner):
         if os.getenv('HUB_SERVICE_HOST') and os.getenv('HUB_SERVICE_PORT_API'):
             pod_env['JUPYTERHUB_API_URL'] = "http://%s:%s/hub/api" % (os.getenv('HUB_SERVICE_HOST'), os.getenv('HUB_SERVICE_PORT_API') )
 
+        # inject google drive client id
+        if os.getenv('JUPYTERLAB_GOOGLE_OAUTH_CLIENTID'):
+            pod_env['JUPYTERLAB_GOOGLE_OAUTH_CLIENTID'] = os.getenv('JUPYTERLAB_GOOGLE_OAUTH_CLIENTID')
+
         # determine which labels to schedule the jupyterlab pod on
         # get names of groups
         gnames = [ i.split(':')[0] for i in self.user_gids ]

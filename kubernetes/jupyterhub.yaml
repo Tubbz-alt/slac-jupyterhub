@@ -144,6 +144,11 @@ $(list=(${hub__nodeSelectors// / }); for k in "${!list[@]}"; do kv=(${list[k]//\
               value: '0.5'
             - name: JUPYTERLAB_CONFIG_DIR
               value: '/opt/jupyterhub/config'
+            - name: JUPYTERLAB_GOOGLE_OAUTH_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: hub
+                  key: google_oauth_clientid
             - name: GITHUB_ORGANIZATION_WHITELIST
               valueFrom:
                 secretKeyRef:
