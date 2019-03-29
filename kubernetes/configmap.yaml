@@ -36,3 +36,7 @@ $( cat ${lsst_images_file}  | sed 's/^/    /' )
   06-cdms.yaml: |-
 
 $( cat ${cdms_images_file}  | sed 's/^/    /' )
+
+  07-atlas.yaml: |-
+
+$( cat ${atlas_images_file}  | sed 's/^/    /' )

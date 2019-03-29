@@ -19,8 +19,8 @@ export hub_crypto_key="ac21128104346d4c6054728430d69ffe498f1545a8960f3173d6e65ba
 ###
 # hub image
 ##
-export hub_image="slaclab/slac-jupyterhub:20190302.0"
-#export hub_image="slaclab/jupyterhub:20181103.0"
+#export hub_image="slaclab/slac-jupyterhub:20190302.0"
+export hub_image="slaclab/slac-jupyterhub:20190329.0"
 
 ###
 # jupyter lab storage
@@ -43,6 +43,12 @@ export cdms_home="/gpfs/slac/staas/fs1/g/supercdms/users/"
 export cdms_data="/gpfs/slac/staas/fs1/g/supercdms/"
 
 ###
+# atlas mounts
+###
+export atlas_home="/gpfs/slac/atlas/fs1/u/"
+export atlas_data="/gpfs/slac/atlas/fs1/"
+
+###
 # hub config
 ###
 export jupyterhub_config_file="../config/jupyterhub_config.py"
@@ -56,3 +62,5 @@ export environment_file="../config/jupyterhub_config.d/30-environment.py"
 export node_selectors_file="../config/node-selectors.yaml"
 export slac_images_file="../config/images.d/01-slac.yaml"
 export lsst_images_file="../config/images.d/05-lsst.yaml"
+export cdms_images_file="../config/images.d/06-cdms.yaml"
+export atlas_images_file="../config/images.d/07-atlas.yaml"

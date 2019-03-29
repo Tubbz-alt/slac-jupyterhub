@@ -185,3 +185,37 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: ${cdms_home}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--atlas-data
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--atlas-data
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: ${atlas_data}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ${namespace}--atlas-home
+  labels:
+    type: local
+spec:
+  storageClassName: ${namespace}--atlas-home
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: ${atlas_home}

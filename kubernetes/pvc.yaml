@@ -140,3 +140,29 @@ spec:
   resources:
     requests:
       storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: atlas-data
+spec:
+  storageClassName: ${namespace}--atlas-data
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: atlas-home
+spec:
+  storageClassName: ${namespace}--atlas-home
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
