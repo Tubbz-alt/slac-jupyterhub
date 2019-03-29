@@ -11,19 +11,21 @@ export hub_key_file="../../certs/jupyter-dev/tls.key"
 ###
 # hub persistent db storage
 ###
-export hub_data="/mnt/jupyterhub-dev/"
+export hub__nodeSelectors="group_ocio='yes' storage=gpfs"
+export hub_data="/gpfs/slac/staas/fs1/g/jupyter/jupyterhub-dev"
 export session_db_url="sqlite:////home/jupyter/jupyterhub.sqlite"
 export hub_crypto_key="ac21128104346d4c6054728430d69ffe498f1545a8960f3173d6e65ba5ee3f71"
 
 ###
 # hub image
 ##
-#export hub_image="slaclab/jupyterhub:20181010.0"
-export hub_image="slaclab/jupyterhub:20181103.0"
+export hub_image="slaclab/slac-jupyterhub:20190302.0"
+#export hub_image="slaclab/jupyterhub:20181103.0"
 
 ###
 # jupyter lab storage
 ###
+export jupyter_home="/gpfs/slac/staas/fs1/g/jupyter/"
 export local_home="/scratch/local-home"
 export generic_user_home="/mnt/generic-users"
 
@@ -31,7 +33,14 @@ export generic_user_home="/mnt/generic-users"
 # lsst mounts
 ###
 export lsst_home="/gpfs/slac/lsst/fs1/u/"
-export lsst_data="/gpfs/slac/lsst/fs1/g/data"
+#export lsst_data="/gpfs/slac/lsst/fs1/g/data"
+export lsst_data="/gpfs/slac/lsst/"
+
+###
+# cdms mouns
+###
+export cdms_home="/gpfs/slac/staas/fs1/g/supercdms/users/"
+export cdms_data="/gpfs/slac/staas/fs1/g/supercdms/"
 
 ###
 # hub config

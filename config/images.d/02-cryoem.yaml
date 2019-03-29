@@ -1,6 +1,10 @@
 
-title: "SLAC CryoEM CryoSPARC Images"
+title: "Cryo-EM CryoSPARC Images"
 images:
+  - image: slaclab/slac-jupyterlab-gpu:20190226.3
+    description: CryoEM JupyterLab Image (GPU) v20190226.3
+  - image: slaclab/slac-jupyterlab-gpu:20190106.0
+    description: CryoEM JupyterLab Image (GPU) v20190106.0
   - image: slaclab/cryosparc-docker:2.4-0
     description: cryoSPARC v2.4 (GPU)
   - image: slaclab/cryosparc-docker:2.0.27-0

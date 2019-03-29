@@ -42,9 +42,9 @@ node_selectors:
         - lsst-z
         - lsst-ccs
       images:
-        - jld-lab
+        - sciplat-lab
     spawn_on:
-      group: lsst
+      group_lsst: "true"
     spec:
         volumes:
           - name: lsst-home
@@ -63,22 +63,26 @@ node_selectors:
           - name: 'lsst-home'
             mountPath: '/home/'
           - name: 'lsst-data'
-            mountPath: '/data/'
+            mountPath: '/gpfs/slac/lsst/'
+            #mountPath: '/data/'
           - name: scratch
             mountPath: '/scratch/'
           - name: tmp
             mountPath: '/tmp/'
+        memory: 10G
         
 
   - filter:
+      gnames:
+        - bd
       images:
         - slac-jupyterlab-gpu
     spawn_on:
-      group: ocio
+      group_cryoem: "yes"
       storage: gpfs
       accelerator: nvidia
     spec:
-        volumes: 
+        volumes:
           - name: jupyter-home
             persistentVolumeClaim:
               claimName: jupyter-home
@@ -94,7 +98,7 @@ node_selectors:
           - name: nfs
             persistentVolumeClaim:
               claimName: nfs
-        volume_mounts: 
+        volume_mounts:
           - name: jupyter-home
             mountPath: '/home/'
           - name: scratch
@@ -112,9 +116,44 @@ node_selectors:
 
   - filter:
       images:
+        - slac-jupyterlab-gpu
+    spawn_on:
+      group_ocio: "yes"
+      storage: gpfs
+      accelerator: nvidia
+    spec:
+        volumes: 
+          - name: jupyter-home
+            persistentVolumeClaim:
+              claimName: jupyter-home
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
+          - name: gpfs
+            persistentVolumeClaim:
+              claimName: gpfs
+        volume_mounts: 
+          - name: jupyter-home
+            mountPath: '/home/'
+          - name: scratch
+            mountPath: '/scratch/'
+          - name: tmp
+            mountPath: '/tmp/'
+          - name: gpfs
+            mountPath: '/gpfs/'
+        cpu: 4
+        memory: 10G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+
+  - filter:
+      images:
         - cdms-jupyterlab
     spawn_on:
-      group: ocio
+      group_cdms: "true"
       storage: gpfs
     spec:
         volumes:
@@ -152,7 +191,7 @@ node_selectors:
       images:
         - cryosparc-docker
     spawn_on:
-      group: cryoem
+      group_cryoem: "true"
       storage: gpfs
       accelerator: nvidia
     spec:

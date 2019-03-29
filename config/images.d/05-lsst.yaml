@@ -1,6 +1,11 @@
+#- {description: Weekly 2019_03, image: 'lsstsqre/jld-lab:w201903'}
+#- {description: Weekly 2019_02, image: 'lsstsqre/jld-lab:w201902'}
+#- {description: Release 16.0, image: 'lsstsqre/jld-lab:r160'}
+#title: LSST lsstsqre/jld-lab Images
+#updated: Tue Feb  5 19:44:48 2019 UTC
 images:
-- {description: Weekly 2018_43, image: 'lsstsqre/jld-lab:w201843'}
-- {description: Weekly 2018_42, image: 'lsstsqre/jld-lab:w201842'}
-- {description: Release 16.0, image: 'lsstsqre/jld-lab:r160'}
-title: LSST lsstsqre/jld-lab Images
-updated: Mon Oct 29 22:00:09 2018 UTC
+- {description: Weekly 2019_08, image: 'lsstsqre/sciplat-lab:w201908'}
+- {description: Weekly 2019_07, image: 'lsstsqre/sciplat-lab:w201907'}
+- {description: Release 17.0rc2, image: 'lsstsqre/sciplat-lab:r170rc2'}
+title: LSST lsstsqre/sciplat-lab Images
+updated: Wed Feb 27 23:12:09 2019 UTC

@@ -1,5 +1,7 @@
 
 title: "SuperCDMS Images"
 images:
-  - image: detlab/cdms-jupyterlab:latest
-    description: CDMS Jupyterlab Image - Latest
+  - image: detlab/cdms-jupyterlab:0.1.0
+    description: CDMS Jupyterlab Image - v 0.1.0 
+  - image: detlab/cdms-jupyterlab:0.1.0b
+    description: CDMS Jupyterlab Image - v 0.1.0 beta

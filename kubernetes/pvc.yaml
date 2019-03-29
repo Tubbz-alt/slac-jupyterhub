@@ -97,7 +97,7 @@ metadata:
 spec:
   storageClassName: ${namespace}--lsst-data
   accessModes:
-    - "ReadWriteOnce"
+    - "ReadWriteMany"
   resources:
     requests:
       storage: 10Gi
@@ -115,6 +115,18 @@ spec:
     requests:
       storage: 10Gi
 
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cdms-data
+spec:
+  storageClassName: ${namespace}--cdms-data
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 10Gi
 
 ---
 kind: PersistentVolumeClaim
