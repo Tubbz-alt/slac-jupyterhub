@@ -20,10 +20,11 @@ RUN  source scl_source enable rh-python36 && \
       cryptography mysqlclient
 RUN  source scl_source enable rh-python36 && \
       pip3 install \
-       https://github.com/jupyterhub/jupyterhub/zipball/master \
-       https://github.com/jupyterhub/kubespawner/zipball/master \
-       https://github.com/jupyterhub/oauthenticator/zipball/master \
-       https://github.com/jupyterhub/ldapauthenticator/zipball/master
+        jupyterhub \
+        jupyterhub-kubespawner \
+        batchspawner \
+        oauthenticator \
+        jupyterhub-ldapauthenticator
 
 RUN  source scl_source enable rh-python36 && \
       jupyter serverextension enable --py \
@@ -40,8 +41,5 @@ COPY local01-scl.sh /etc/profile.d/
 ENV  LANG=C.UTF-8
 RUN  groupadd -g 768 jupyter
 RUN  useradd -m -g jupyter -u 768 -c "JupyterHub User" jupyter
-LABEL  description="jupyterhub" \
-       name="slaclab/jupyterhub" \
-       version="0.6.0"
 
 CMD [ "/opt/jupyterhub/hublauncher.sh" ]
