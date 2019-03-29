@@ -34,24 +34,24 @@ function gen_template() {
 kubectl create namespace ${namespace}
 
 # roles
-gen_template "rbac.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
+gen_template "rbac.yaml" | kubectl  -n ${namespace} ${ACTION} -f -
 
 # create the secrets
-gen_template "secrets.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
+gen_template "secrets.yaml" | kubectl  -n ${namespace} ${ACTION} -f -
 
 # create the storage pv
-gen_template "pv.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
+gen_template "pv.yaml" | kubectl  -n ${namespace} ${ACTION} -f -
 
 # create pvcs
-gen_template "pvc.yaml" | kubectl  -n ${namespace} ${ACTION} --record -f -
+gen_template "pvc.yaml" | kubectl  -n ${namespace} ${ACTION} -f -
 
 # create the hub
 # this doesn't work for some reason
-# gen_template "configmap.yaml" | kubectl -n ${namespace} ${ACTION} --record -f -
+# gen_template "configmap.yaml" | kubectl -n ${namespace} ${ACTION} -f -
 # TODO deal with a replace
 if [ "${ACTION}" == "replace" ]; then
   kubectl -n ${namespace} delete configmap hub-config
 fi
 kubectl -n ${namespace} create configmap hub-config  --from-file=../config/jupyterhub_config.py  --from-file=../config/node-selectors.yaml --from-file=../config/jupyterhub_config.d --from-file=../config/images.d
 
-gen_template "jupyterhub.yaml" | kubectl -n ${namespace} ${ACTION} --record -f -
+gen_template "jupyterhub.yaml" | kubectl -n ${namespace} ${ACTION} -f -

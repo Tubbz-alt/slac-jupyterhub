@@ -215,5 +215,6 @@ $(list=(${hub__nodeSelectors// / }); for k in "${!list[@]}"; do kv=(${list[k]//\
               path: images.d/05-lsst.yaml
             - key: 06-cdms.yaml
               path: images.d/06-cdms.yaml
-
+            - key: 07-atlas.yaml
+              path: images.d/07-atlas.yaml
 
