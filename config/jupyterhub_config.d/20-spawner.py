@@ -206,7 +206,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
         self.log.info("spawning pod %s on %s, spec %s" % (pod_name,spawn_on,spec))
         return make_pod(
             name=self.pod_name,
-            image_spec=self.image_spec,
+            image=self.image_spec,
             image_pull_policy=self.image_pull_policy,
             image_pull_secret=self.image_pull_secrets,
             port=self.port,
