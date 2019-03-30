@@ -24,7 +24,7 @@ RUN  source scl_source enable rh-python36 && \
         jupyterhub-kubespawner \
         batchspawner \
         oauthenticator \
-        jupyterhub-ldapauthenticator
+        https://github.com/jupyterhub/ldapauthenticator/zipball/master	
 
 RUN  source scl_source enable rh-python36 && \
       jupyter serverextension enable --py \
