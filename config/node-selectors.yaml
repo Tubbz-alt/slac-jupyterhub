@@ -177,6 +177,9 @@ node_selectors:
           - name: nfs
             persistentVolumeClaim:
               claimName: nfs
+          - name: cdms-data
+            persistentVolumeClaim:
+              claimName: cdms-data
         volume_mounts:
           - name: cdms-home
             mountPath: '/home/'
@@ -194,6 +197,7 @@ node_selectors:
   - filter:
       gnames:
         - at
+        - atlas
         - atlas-user
       images:
         - atlas-jupyterlab-pyroot
