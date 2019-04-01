@@ -115,7 +115,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
             image_name = image_spec[(s_idx + 1):]
             if c_idx > 0:
                 image_name = image_spec[(s_idx + 1):c_idx]
-                tag = image_spec[(c_idx + 1):]
+                tag = image_spec[(c_idx + 1):].replace('_','.')
         pn_template = image_name + "-{username}-" + tag
         # self.log.info('running image: %s' % (image_name,))
 
