@@ -21,7 +21,7 @@ export hub_google_oauth_clientid="../../certs/jupyter-dev/google_oauth_clientid"
 # hub image
 ##
 #export hub_image="slaclab/slac-jupyterhub:20190302.0"
-export hub_image="slaclab/slac-jupyterhub:20190329.0"
+export hub_image="slaclab/slac-jupyterhub:20190329.1"
 
 ###
 # jupyter lab storage
@@ -34,7 +34,6 @@ export generic_user_home="/mnt/generic-users"
 # lsst mounts
 ###
 export lsst_home="/gpfs/slac/lsst/fs1/u/"
-#export lsst_data="/gpfs/slac/lsst/fs1/g/data"
 export lsst_data="/gpfs/slac/lsst/"
 
 ###
@@ -47,7 +46,7 @@ export cdms_data="/gpfs/slac/staas/fs1/g/supercdms/"
 # atlas mounts
 ###
 export atlas_home="/gpfs/slac/atlas/fs1/u/"
-export atlas_data="/gpfs/slac/atlas/fs1/"
+export atlas_data="/gpfs/slac/atlas/"
 
 ###
 # hub config

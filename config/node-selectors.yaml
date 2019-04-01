@@ -73,49 +73,49 @@ node_selectors:
         memory: 10G
         
 
-  - filter:
-      gnames:
-        - bd
-      images:
-        - slac-jupyterlab-gpu
-    spawn_on:
-      group/cryoem: "true"
-      storage/cryoem: "true"
-      accelerator: nvidia
-    spec:
-        volumes:
-          - name: jupyter-home
-            persistentVolumeClaim:
-              claimName: jupyter-home
-          - name: scratch
-            persistentVolumeClaim:
-              claimName: scratch
-          - name: tmp
-            persistentVolumeClaim:
-              claimName: tmp
-          - name: gpfs
-            persistentVolumeClaim:
-              claimName: gpfs
-          - name: nfs
-            persistentVolumeClaim:
-              claimName: nfs
-        volume_mounts:
-          - name: jupyter-home
-            mountPath: '/home/'
-          - name: scratch
-            mountPath: '/scratch/'
-          - name: tmp
-            mountPath: '/tmp/'
-          - name: nfs
-            mountPath: '/nfs/'
-          - name: gpfs
-            mountPath: '/gpfs/'
-        cpu: 4
-        memory: 10G
-        extra_resource_limits:
-          nvidia.com/gpu: "1"
-        extra_pod_config:
-          hostIPC: True
+#  - filter:
+#      gnames:
+#        - bd
+#      images:
+#        - slac-jupyterlab-gpu
+#    spawn_on:
+#      group/cryoem: "true"
+#      storage/cryoem: "true"
+#      accelerator: nvidia
+#    spec:
+#        volumes:
+#          - name: jupyter-home
+#            persistentVolumeClaim:
+#              claimName: jupyter-home
+#          - name: scratch
+#            persistentVolumeClaim:
+#              claimName: scratch
+#          - name: tmp
+#            persistentVolumeClaim:
+#              claimName: tmp
+#          - name: gpfs
+#            persistentVolumeClaim:
+#              claimName: gpfs
+#          - name: nfs
+#            persistentVolumeClaim:
+#              claimName: nfs
+#        volume_mounts:
+#          - name: jupyter-home
+#            mountPath: '/home/'
+#          - name: scratch
+#            mountPath: '/scratch/'
+#          - name: tmp
+#            mountPath: '/tmp/'
+#          - name: nfs
+#            mountPath: '/nfs/'
+#          - name: gpfs
+#            mountPath: '/gpfs/'
+#        cpu: 4
+#        memory: 10G
+#        extra_resource_limits:
+#          nvidia.com/gpu: "1"
+#        extra_pod_config:
+#          hostIPC: True
 
   - filter:
       images:
@@ -153,6 +153,8 @@ node_selectors:
           nvidia.com/gpu: "1"
 
   - filter:
+      #gnames:
+      #  - cdms
       images:
         - cdms-jupyterlab
     spawn_on:
@@ -184,8 +186,43 @@ node_selectors:
             mountPath: '/tmp/'
           - name: nfs
             mountPath: '/nfs/'
-          - name: gpfs
-            mountPath: '/gpfs/'
+          - name: cdms-data
+            mountPath: '/gpfs/slac/staas/fs1/g/supercdms/'
+        cpu: 4
+        memory: 10G
+
+  - filter:
+      gnames:
+        - at
+        - atlas-user
+      images:
+        - atlas-jupyterlab-pyroot
+    spawn_on:
+      group/atlas: "true"
+      storage/atlas: "true"
+    spec:
+        volumes:
+          - name: atlas-home
+            persistentVolumeClaim:
+              claimName: atlas-home
+          - name: scratch
+            persistentVolumeClaim:
+              claimName: scratch
+          - name: tmp
+            persistentVolumeClaim:
+              claimName: tmp
+          - name: atlas-data
+            persistentVolumeClaim:
+              claimName: atlas-data
+        volume_mounts:
+          - name: atlas-home
+            mountPath: '/home/'
+          - name: scratch
+            mountPath: '/scratch/'
+          - name: tmp
+            mountPath: '/tmp/'
+          - name: atlas-data
+            mountPath: '/gpfs/slac/atlas/'
         cpu: 4
         memory: 10G
 
