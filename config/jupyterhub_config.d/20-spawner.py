@@ -100,14 +100,14 @@ class SLACSpawner(kubespawner.KubeSpawner):
         labels.update(self._expand_all(self.extra_labels))
 
         pod_name = self.pod_name
-        image_spec = (self.image_spec or os.getenv("LAB_IMAGE") )
+        image_spec = (self.image or os.getenv("LAB_IMAGE") )
         image_name = image_spec
         if self.user_options:
             if self.user_options.get('kernel_image'):
                 image_spec = self.user_options.get('kernel_image')
                 image_name = image_spec
                 self.log.info("Replacing image spec from options form: %s" % image_spec)
-        self.image_spec = image_spec
+        self.image = image_spec
         s_idx = image_spec.find('/')
         c_idx = image_spec.find(':')
         tag = "latest"
@@ -210,7 +210,7 @@ class SLACSpawner(kubespawner.KubeSpawner):
         self.log.info("spawning pod %s on %s, spec %s" % (pod_name,spawn_on,spec))
         return make_pod(
             name=self.pod_name,
-            image=self.image_spec,
+            image=self.image,
             image_pull_policy=self.image_pull_policy,
             image_pull_secret=self.image_pull_secrets,
             port=self.port,
